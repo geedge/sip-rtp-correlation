@@ -4,6 +4,7 @@ object SchemaTypes {
 
   val SIP = "SIP"
   val RTP = "RTP"
+  val VoIP = "VoIP"
 }
 
 object StreamDirs {
