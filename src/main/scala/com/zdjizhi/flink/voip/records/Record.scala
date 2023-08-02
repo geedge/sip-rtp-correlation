@@ -50,6 +50,13 @@ class Record(obj: ObjectNode) {
    */
   val clientPort: Int = getInt(F_COMMON_CLIENT_PORT)
 
+  def merge(obj: ObjectNode): ObjectNode = {
+    obj.fields().forEachRemaining(entry => {
+      o.set(entry.getKey, entry.getValue)
+    })
+    o
+  }
+
 }
 
 /**
@@ -103,7 +110,10 @@ object Record {
    * @return 字段对应的整数值
    */
   def getInt(field: String, default: Int = 0)(implicit o: ObjectNode): Int = {
-    o.get(field).asInt(default)
+    val node = o.get(field)
+    if (node != null && node.isInt) {
+      node.asInt(default)
+    } else default
   }
 
   /**
@@ -115,12 +125,13 @@ object Record {
    * @return 字段对应的字符串值
    */
   def getString(field: String, default: String = null)(implicit o: ObjectNode): String = {
-    o.get(field).asText(default)
+    val node = o.get(field)
+    if (node != null && node.isTextual) {
+      node.asText(default)
+    } else default
   }
 
   object Implicits {
-    implicit def asRecord(o: ObjectNode): Record = {
-      new Record(o)
-    }
+    implicit def asRecord(o: ObjectNode): Record = new Record(o)
   }
 }
