@@ -50,3 +50,12 @@ object Address {
  * @param expireTime The expiration time for the object.
  */
 case class ObjectNodeWithExpiration(obj: ObjectNode, expireTime: Long)
+
+/**
+ * A case class representing an ObjectNode with an expiration time and a pair times.
+ *
+ * @param obj        The ObjectNode containing data.
+ * @param expireTime The expiration time for the object.
+ * @param times      The pair times for the object.
+ */
+case class ObjectNodeWithInfo(obj: ObjectNode, expireTime: Long, times: Int)
