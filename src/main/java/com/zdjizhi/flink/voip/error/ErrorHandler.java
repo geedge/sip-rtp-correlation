@@ -101,12 +101,12 @@ class MeaninglessAddressProcessFunction extends ProcessFunction<ObjectNode, Obje
                 record.getServerPort() >= 0;
 
         final SIPRecord sipRecord = new SIPRecord(obj);
-        boolean cond2 = IPUtil.isIPAddress(sipRecord.getOriginatorSdpConnectIp()) &&
-                IPUtil.internalIp(sipRecord.getOriginatorSdpConnectIp())
-                || IPUtil.isIPAddress(sipRecord.getResponderSdpConnectIp()) &&
-                IPUtil.internalIp(sipRecord.getResponderSdpConnectIp());
+        boolean cond2 = !IPUtil.isIPAddress(sipRecord.getOriginatorSdpConnectIp())
+                || IPUtil.internalIp(sipRecord.getOriginatorSdpConnectIp());
+        boolean cond3 = !IPUtil.isIPAddress(sipRecord.getResponderSdpConnectIp())
+                || IPUtil.internalIp(sipRecord.getResponderSdpConnectIp());
 
-        if (cond1 && cond2) {
+        if (cond1 && cond2 && cond3) {
             out.collect(obj);
         } else {
             // Output invalid records to the invalid output tag
