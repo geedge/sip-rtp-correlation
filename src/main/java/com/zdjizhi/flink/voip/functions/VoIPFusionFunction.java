@@ -104,6 +104,7 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Integer, ObjectNo
                 out.collect(obj);
             }
             if (entry.getValue().getExpireTime() <= timestamp) {
+                out.collect(rtpState.get(address).getObj());
                 rtpState.remove(address);
             }
         }
