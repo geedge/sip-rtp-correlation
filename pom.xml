@@ -101,10 +101,14 @@
             <artifactId>log4j-core</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.26</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
-
         <dependencies>
             <dependency>
                 <groupId>org.slf4j</groupId>
