@@ -2,6 +2,7 @@ package com.zdjizhi.flink.voip.functions;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Setter;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
@@ -21,7 +22,8 @@ class ObjectNodeInfo {
     private final long expireTime;
 
     // The pair times for the object.
-    private final int times;
+    @Setter
+    private int times;
 
     public ObjectNodeInfo(final ObjectNode obj, final long expireTime) {
         this.obj = obj;
