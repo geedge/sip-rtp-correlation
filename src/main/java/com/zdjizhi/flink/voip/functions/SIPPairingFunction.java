@@ -11,6 +11,8 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.Obje
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
 
+import java.util.Map;
+
 /**
  * A KeyedProcessFunction that pairs SIP records based on their addresses and stream direction.
  * SIP records are paired when they have the same addresses but opposite stream directions.
@@ -45,7 +47,9 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple2<Integer, Str
                     Tuple2.of(record.getServerIp(), record.getServerPort()));
             // If the address is already stored in the mapState and has the opposite stream direction,
             // merge the SIP records, change the stream direction to DOUBLE, and output the merged record.
-            if (mapState.contains(address) && new Record(mapState.get(address).getObj()).getStreamDir() != record.getStreamDir() /* TODO consider stream direction */) {
+            if (mapState.contains(address) &&
+                    new Record(mapState.get(address).getObj()).getStreamDir() != record.getStreamDir()
+                /* TODO consider stream direction */) {
                 record.merge(mapState.get(address).getObj());
                 record.setInt(Record.F_COMMON_STREAM_DIR, StreamDir.DOUBLE.getValue());
                 out.collect(value);
@@ -67,16 +71,12 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple2<Integer, Str
     public void onTimer(long timestamp,
                         KeyedProcessFunction<Tuple2<Integer, String>, ObjectNode, ObjectNode>.OnTimerContext ctx,
                         Collector<ObjectNode> out) throws Exception {
-        mapState.iterator().forEachRemaining(entry -> {
+        for (final Map.Entry<Address, ObjectNodeInfo> entry : mapState.entries()) {
             if (entry.getValue().getExpireTime() <= timestamp) {
-                try {
-                    // Remove expired entries from the mapState based on their expiration time.
-                    mapState.remove(entry.getKey());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                // Remove expired entries from the mapState based on their expiration time.
+                mapState.remove(entry.getKey());
             }
-        });
+        }
         registerNextFireTimestamp(ctx.timerService(), fireInterval);
     }
 }
