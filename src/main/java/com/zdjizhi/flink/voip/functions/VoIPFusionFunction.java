@@ -36,8 +36,8 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Integer, ObjectNo
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        final Long milliseconds = getGlobalConfiguration().get(FusionConfigs.RTP_STATE_CLEAR_INTERVAL);
-        fireInterval = Time.milliseconds(milliseconds);
+        final int minutes = getGlobalConfiguration().get(FusionConfigs.RTP_STATE_CLEAR_INTERVAL);
+        fireInterval = Time.minutes(minutes);
         sipDoubleDirState = getMapState("sip-state", Address.class, ObjectNodeInfo.class);
         rtpState = getMapState("rtp-state", Address.class, ObjectNodeInfo.class);
     }

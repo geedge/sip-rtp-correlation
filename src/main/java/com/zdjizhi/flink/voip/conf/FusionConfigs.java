@@ -1,6 +1,5 @@
 package com.zdjizhi.flink.voip.conf;
 
-import org.apache.flink.api.common.time.Time;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 
@@ -44,19 +43,19 @@ public class FusionConfigs {
      * The configuration option for the interval at which SIP state data
      * should be cleared.
      */
-    public static final ConfigOption<Long> SIP_STATE_CLEAR_INTERVAL =
-            ConfigOptions.key("")
-                    .longType()
-                    .defaultValue(Time.minutes(1).toMilliseconds())
+    public static final ConfigOption<Integer> SIP_STATE_CLEAR_INTERVAL =
+            ConfigOptions.key("sip.state.clear.interval.minutes")
+                    .intType()
+                    .defaultValue(1)
                     .withDescription("The interval at which SIP state data should be cleared.");
 
     /**
      * The configuration option for the interval at which STP state data
      * should be cleared.
      */
-    public static final ConfigOption<Long> RTP_STATE_CLEAR_INTERVAL =
-            ConfigOptions.key("")
-                    .longType()
-                    .defaultValue(Time.minutes(3).toMilliseconds())
+    public static final ConfigOption<Integer> RTP_STATE_CLEAR_INTERVAL =
+            ConfigOptions.key("rtp.state.clear.interval.minutes")
+                    .intType()
+                    .defaultValue(3)
                     .withDescription("The interval at which RTP state data should be cleared.");
 }
