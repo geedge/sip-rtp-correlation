@@ -138,11 +138,11 @@ public class Record {
      * Merge the fields of another ObjectNode into the current data record.
      *
      * @param other The ObjectNode containing the fields to be merged.
-     * @return The merged ObjectNode.
+     * @return This record.
      */
-    public final ObjectNode merge(final ObjectNode other) {
+    public final Record merge(final ObjectNode other) {
         other.fields().forEachRemaining(entry -> obj.set(entry.getKey(), entry.getValue()));
-        return obj;
+        return this;
     }
 
     /**
