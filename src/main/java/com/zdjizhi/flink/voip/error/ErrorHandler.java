@@ -5,6 +5,8 @@ import com.zdjizhi.flink.voip.conf.FusionConfiguration;
 import com.zdjizhi.flink.voip.formats.JsonNodeSerializationSchema;
 import com.zdjizhi.flink.voip.records.Record;
 import com.zdjizhi.flink.voip.records.SIPRecord;
+import com.zdjizhi.flink.voip.records.SchemaType;
+import com.zdjizhi.flink.voip.records.StreamDir;
 import com.zdjizhi.utils.IPUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
@@ -105,8 +107,21 @@ class MeaninglessAddressProcessFunction extends ProcessFunction<ObjectNode, Obje
                 || IPUtil.internalIp(sipRecord.getOriginatorSdpConnectIp());
         boolean cond3 = !IPUtil.isIPAddress(sipRecord.getResponderSdpConnectIp())
                 || IPUtil.internalIp(sipRecord.getResponderSdpConnectIp());
+        boolean cond4 = IPUtil.isIPAddress(sipRecord.getOriginatorSdpConnectIp())
+                || IPUtil.isIPAddress(sipRecord.getResponderSdpConnectIp());
+        boolean cond5 = SchemaType.SIP.getValue().equalsIgnoreCase(sipRecord.getSchemaType());
+        boolean cond6 = StreamDir.DOUBLE.getValue() == sipRecord.getStreamDir() &&
+                IPUtil.internalIp(sipRecord.getResponderSdpConnectIp()) &&
+                IPUtil.internalIp(sipRecord.getOriginatorSdpConnectIp());
 
-        if (cond1 && cond2 && cond3) {
+        // Both client and server addresses in the data are valid.
+        if (cond1 && (
+                // The address in the SIP one-way stream is valid and not an internal network address.
+                cond2 && cond3 && cond4 && cond5
+                        // The coordinating addresses in the SIP double directional stream are valid
+                        // and not internal network addresses.
+                        || cond5 && cond6
+                        || !cond5)) {
             out.collect(obj);
         } else {
             // Output invalid records to the invalid output tag
