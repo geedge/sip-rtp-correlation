@@ -43,15 +43,15 @@ public class SIPRecord extends Record {
         return Record.getString(obj, F_ORIGINATOR_SDP_CONNECT_IP);
     }
 
-    public String getOriginatorSdpMediaPort() {
-        return Record.getString(obj, F_ORIGINATOR_SDP_MEDIA_PORT);
+    public int getOriginatorSdpMediaPort() {
+        return Record.getInt(obj, F_ORIGINATOR_SDP_MEDIA_PORT);
     }
 
     public String getResponderSdpConnectIp() {
         return Record.getString(obj, F_RESPONDER_SDP_CONNECT_IP);
     }
 
-    public String getResponderSdpMediaPort() {
-        return Record.getString(obj, F_RESPONDER_SDP_MEDIA_PORT);
+    public int getResponderSdpMediaPort() {
+        return Record.getInt(obj, F_RESPONDER_SDP_MEDIA_PORT);
     }
 }
