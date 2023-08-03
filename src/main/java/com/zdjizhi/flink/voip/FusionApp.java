@@ -1,6 +1,7 @@
 package com.zdjizhi.flink.voip;
 
 import com.zdjizhi.flink.voip.conf.FusionConfiguration;
+import com.zdjizhi.flink.voip.error.ErrorHandler;
 import com.zdjizhi.flink.voip.formats.JsonNodeSerializationSchema;
 import com.zdjizhi.flink.voip.functions.SIPPairingFunction;
 import com.zdjizhi.flink.voip.functions.TypeSplitFunction;
@@ -14,6 +15,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.formats.json.JsonNodeDeserializationSchema;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
@@ -52,9 +54,13 @@ public class FusionApp {
                 fusionConfiguration
                         .getProperties(SOURCE_KAFKA_PROPERTIES_PREFIX));
 
+        final DataStreamSource<ObjectNode> sourceStream = env.addSource(kafkaConsumer);
+
+        final ErrorHandler errorHandler = new ErrorHandler(config);
+
         // Process the data using the TypeSplitFunction and split it into separate DataStreams for SIP and RTP data
         final SingleOutputStreamOperator<ObjectNode> splitsRecordsOperator =
-                env.addSource(kafkaConsumer)
+                errorHandler.filterError(sourceStream)
                         .process(new TypeSplitFunction())
                         .name("SplitsRecordsBasedSchemaType")
                         .uid("splits-records-based-schema-type");

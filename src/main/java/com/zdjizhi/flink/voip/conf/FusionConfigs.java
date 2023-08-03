@@ -22,6 +22,11 @@ public class FusionConfigs {
     public static final String SINK_KAFKA_PROPERTIES_PREFIX = "sink.kafka.props.";
 
     /**
+     * Configuration prefix for the properties of the Kafka sink where the error data will be output.
+     */
+    public static final String ERROR_SINK_KAFKA_PROPERTIES_PREFIX = "error.sink.kafka.props.";
+
+    /**
      * Configuration option for the Kafka topic used in the source.
      */
     public static final ConfigOption<String> SOURCE_KAFKA_TOPIC =
@@ -38,6 +43,28 @@ public class FusionConfigs {
                     .stringType()
                     .noDefaultValue()
                     .withDescription("The Kafka topic used in the sink.");
+
+    /**
+     * Configuration option to enable or disable the output of error records.
+     * If set to true, the error records will be sent to the specified Kafka topic.
+     * Default value is false.
+     */
+    public static final ConfigOption<Boolean> ERROR_RECORDS_OUTPUT_ENABLE =
+            ConfigOptions.key("error.records.output.enable")
+                    .booleanType()
+                    .defaultValue(false)
+                    .withDescription("Enable or disable the output of error records. " +
+                            "If set to true, the error records will be sent to the specified Kafka topic.");
+
+    /**
+     * Configuration option for specifying the Kafka topic name where the error data will be sent.
+     * This configuration option is used when the output of error records is enabled.
+     */
+    public static final ConfigOption<String> ERROR_SINK_KAFKA_TOPIC =
+            ConfigOptions.key("error.sink.kafka.topic")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription("The Kafka topic name where the error records will be sent.");
 
     /**
      * The configuration option for the interval at which SIP state data
