@@ -29,7 +29,7 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple2<Integer, Str
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        fireInterval = Time.milliseconds(getGlobalConfiguration()
+        fireInterval = Time.minutes(getGlobalConfiguration()
                 .get(FusionConfigs.SIP_STATE_CLEAR_INTERVAL));
         mapState = getMapState("sip-state", Address.class, ObjectNodeInfo.class);
     }
