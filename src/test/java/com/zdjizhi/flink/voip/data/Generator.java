@@ -1,6 +1,7 @@
 package com.zdjizhi.flink.voip.data;
 
 import com.github.javafaker.Faker;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,7 +24,9 @@ public abstract class Generator<T> {
 
     private final Faker faker;
 
-    private final AtomicReference<T> state;
+    protected final AtomicReference<T> state;
+
+    protected final ObjectMapper mapper;
 
     /**
      * Creates a new Generator with the given ratio.
@@ -35,6 +38,7 @@ public abstract class Generator<T> {
         this.faker = new Faker();
         this.random = ThreadLocalRandom.current();
         this.state = new AtomicReference<>();
+        this.mapper = new ObjectMapper();
     }
 
     /**
@@ -43,16 +47,7 @@ public abstract class Generator<T> {
      *
      * @return The next generated record of type T.
      */
-    public final T next() {
-        int i = random.nextInt(100);
-        if (i < ratio && state.get() != null) {
-            T t = afterState(state.get());
-            state.set(null);
-            return t;
-        } else {
-            return state.updateAndGet(t -> generate());
-        }
-    }
+    public abstract T next();
 
     /**
      * Generates a new record of type T.
