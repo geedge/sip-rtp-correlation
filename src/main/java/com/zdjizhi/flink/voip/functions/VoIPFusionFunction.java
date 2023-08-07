@@ -43,7 +43,7 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Integer, ObjectNo
     }
 
     @Override
-    public void processElement1(ObjectNode obj,
+    public void processElement2(ObjectNode obj,
                                 KeyedCoProcessFunction<Integer, ObjectNode, ObjectNode, ObjectNode>.Context ctx,
                                 Collector<ObjectNode> out) throws Exception {
         final SIPRecord record = new SIPRecord(obj);
@@ -56,7 +56,7 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Integer, ObjectNo
     }
 
     @Override
-    public void processElement2(ObjectNode obj,
+    public void processElement1(ObjectNode obj,
                                 KeyedCoProcessFunction<Integer, ObjectNode, ObjectNode, ObjectNode>.Context ctx,
                                 Collector<ObjectNode> out) throws Exception {
         final Record record = new Record(obj);
@@ -104,15 +104,15 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Integer, ObjectNo
                 out.collect(obj);
             }
             if (entry.getValue().getExpireTime() <= timestamp) {
-                out.collect(rtpState.get(address).getObj());
-                rtpState.remove(address);
+                out.collect(entry.getValue().getObj());
+                iterator.remove();
             }
         }
         final Iterator<Map.Entry<Address, ObjectNodeInfo>> sipIterator = sipDoubleDirState.iterator();
         while (sipIterator.hasNext()) {
             final Map.Entry<Address, ObjectNodeInfo> entry = sipIterator.next();
             if (entry.getValue().getExpireTime() <= timestamp) {
-                sipDoubleDirState.remove(entry.getKey());
+               sipIterator.remove();
             }
         }
         registerNextFireTimestamp(ctx.timerService(), fireInterval);

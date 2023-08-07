@@ -72,12 +72,17 @@ public class FusionApp {
         final DataStream<ObjectNode> rtpDataStream = splitsRecordsOperator
                 .getSideOutput(TypeSplitFunction.RTP_OUTPUT_TAG);
 
+        final KeySelector<ObjectNode, Tuple2<Integer, String>> sipKeySelector = new KeySelector<>() {
+            @Override
+            public Tuple2<Integer, String> getKey(ObjectNode obj) throws Exception {
+                final SIPRecord record = new SIPRecord(obj);
+                return Tuple2.of(record.getVSysID(), record.getCallID());
+            }
+        };
+
         // Process SIP data to create a double directional stream using SIPPairingFunction.
         final SingleOutputStreamOperator<ObjectNode> sipDoubleDirOperator = sipDataStream
-                .keyBy((KeySelector<ObjectNode, Tuple2<Integer, String>>) obj -> {
-                    final SIPRecord record = new SIPRecord(obj);
-                    return Tuple2.of(record.getVSysID(), record.getCallID());
-                })
+                .keyBy(sipKeySelector)
                 .process(new SIPPairingFunction())
                 .name("PairingOneWayToDoubleStream")
                 .uid("pairing-one-way-to-double");

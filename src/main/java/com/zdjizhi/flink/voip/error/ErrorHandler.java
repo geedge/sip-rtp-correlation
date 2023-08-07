@@ -9,6 +9,7 @@ import com.zdjizhi.flink.voip.records.SchemaType;
 import com.zdjizhi.flink.voip.records.StreamDir;
 import com.zdjizhi.utils.IPUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -34,7 +35,7 @@ public class ErrorHandler {
      * The OutputTag for invalid records.
      */
     public static final OutputTag<ObjectNode> INVALID_OUTPUT_TAG =
-            new OutputTag<>("invalid-records");
+            new OutputTag<>("invalid-records", TypeInformation.of(ObjectNode.class));
 
     private final Configuration config;
 

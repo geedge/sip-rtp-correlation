@@ -11,6 +11,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.Obje
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
 
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -71,10 +72,11 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple2<Integer, Str
     public void onTimer(long timestamp,
                         KeyedProcessFunction<Tuple2<Integer, String>, ObjectNode, ObjectNode>.OnTimerContext ctx,
                         Collector<ObjectNode> out) throws Exception {
-        for (final Map.Entry<Address, ObjectNodeInfo> entry : mapState.entries()) {
+        final Iterator<Map.Entry<Address, ObjectNodeInfo>> iterator = mapState.iterator();
+        while (iterator.hasNext()) {
+            final Map.Entry<Address, ObjectNodeInfo> entry = iterator.next();
             if (entry.getValue().getExpireTime() <= timestamp) {
-                // Remove expired entries from the mapState based on their expiration time.
-                mapState.remove(entry.getKey());
+                iterator.remove();
             }
         }
         registerNextFireTimestamp(ctx.timerService(), fireInterval);
