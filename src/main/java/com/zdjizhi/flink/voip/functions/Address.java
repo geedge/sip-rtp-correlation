@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Data
 @AllArgsConstructor
-class Address {
+public class Address {
 
     // The first IP address.
     private final String ip1;

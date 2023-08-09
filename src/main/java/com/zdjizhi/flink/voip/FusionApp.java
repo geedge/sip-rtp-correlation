@@ -77,7 +77,7 @@ public class FusionApp {
                 .name("PairingOneWayToDoubleStream")
                 .uid("pairing-one-way-to-double");
 
-        final KeySelector<ObjectNode, Integer> vSysSelector = new VSysIDKeySelector();
+        final KeySelector<ObjectNode, Tuple2<Integer, Address>> vSysSelector = new VSysIDKeySelector();
 
         // Fusion SIP data and RTP data to VoIP data.
         final SingleOutputStreamOperator<ObjectNode> voIpOperator = rtpDataStream

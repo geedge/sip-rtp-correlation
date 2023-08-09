@@ -3,6 +3,7 @@ package com.zdjizhi.flink.voip;
 import com.zdjizhi.flink.voip.functions.*;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
@@ -67,7 +68,7 @@ public class FusionTest {
                 .name("PairingOneWayToDoubleStream")
                 .uid("pairing-one-way-to-double");
 
-        final KeySelector<ObjectNode, Integer> vSysSelector = new VSysIDKeySelector();
+        final KeySelector<ObjectNode, Tuple2<Integer, Address>> vSysSelector = new VSysIDKeySelector();
 
         // Fusion SIP data and RTP data to VoIP data.
         final SingleOutputStreamOperator<ObjectNode> voIpOperator = rtpDataStream

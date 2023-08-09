@@ -4,7 +4,6 @@ import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.functions.RichFunction;
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
-import org.apache.flink.api.common.time.Time;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.TimerService;
 
@@ -42,6 +41,7 @@ public interface FunctionHelper extends RichFunction {
         final MapStateDescriptor<K, V> descriptor = new MapStateDescriptor<>(name, key, value);
         return getRuntimeContext().getMapState(descriptor);
     }
+
     int INTERVAL = 1000 * 60;
 
     /**
@@ -54,5 +54,9 @@ public interface FunctionHelper extends RichFunction {
         long current = timerService.currentProcessingTime();
         long nextFireTime = (current / INTERVAL + 1) * INTERVAL + factor % INTERVAL;
         timerService.registerProcessingTimeTimer(nextFireTime);
+    }
+
+    default void registerIntervalFireTimestamp(TimerService timerService) {
+        timerService.registerProcessingTimeTimer(timerService.currentProcessingTime() + INTERVAL);
     }
 }

@@ -9,7 +9,7 @@ import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.shaded.guava18.com.google.common.collect.Lists;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
@@ -33,7 +33,7 @@ public class SIPPairingFunctionTest {
     @BeforeAll
     static void setUp() throws Exception {
         final SIPPairingFunction func = new SIPPairingFunction();
-        final KeyedProcessOperator<Tuple2<Integer, String>, ObjectNode, ObjectNode> operator =
+        final KeyedProcessOperator<Tuple3<Integer, String, Address>, ObjectNode, ObjectNode> operator =
                 new KeyedProcessOperator<>(func);
         final TypeInformation<Integer> type = TypeInformation.of(Integer.class);
         final KeySelector<ObjectNode, Integer> keySelector = jsonNodes -> 0;
