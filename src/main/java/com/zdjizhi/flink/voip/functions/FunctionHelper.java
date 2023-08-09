@@ -42,16 +42,17 @@ public interface FunctionHelper extends RichFunction {
         final MapStateDescriptor<K, V> descriptor = new MapStateDescriptor<>(name, key, value);
         return getRuntimeContext().getMapState(descriptor);
     }
+    int INTERVAL = 1000 * 60;
 
     /**
-     * Register the next fire timestamp for the given TimerService and fire interval.
+     * Registers the next fire timestamp based on the given TimerService and factor.
      *
-     * @param timerService The TimerService used to register the timer.
-     * @param fireInterval The interval at which the timer should fire, represented as a Time object.
+     * @param timerService The TimerService to use for registering the timer.
+     * @param factor       The factor to adjust the next fire timestamp.
      */
-    default void registerNextFireTimestamp(TimerService timerService, Time fireInterval) {
+    default void registerNextFireTimestamp(TimerService timerService, int factor) {
         long current = timerService.currentProcessingTime();
-        long nextFireTime = (current / fireInterval.toMilliseconds() + 1) * fireInterval.toMilliseconds();
+        long nextFireTime = (current / INTERVAL + 1) * INTERVAL + factor % INTERVAL;
         timerService.registerProcessingTimeTimer(nextFireTime);
     }
 }

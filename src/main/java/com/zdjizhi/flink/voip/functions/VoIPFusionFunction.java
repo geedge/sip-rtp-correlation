@@ -5,7 +5,10 @@ import com.zdjizhi.flink.voip.records.Record;
 import com.zdjizhi.flink.voip.records.SIPRecord;
 import com.zdjizhi.flink.voip.records.SchemaType;
 import com.zdjizhi.flink.voip.records.StreamDir;
+import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.common.state.MapState;
+import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
@@ -36,10 +39,26 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Integer, ObjectNo
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        final int minutes = getGlobalConfiguration().get(FusionConfigs.RTP_STATE_CLEAR_INTERVAL);
+        final int minutes = getGlobalConfiguration()
+                .get(FusionConfigs.RTP_STATE_CLEAR_INTERVAL);
         fireInterval = Time.minutes(minutes);
-        sipDoubleDirState = getMapState("sip-state", Address.class, ObjectNodeInfo.class);
-        rtpState = getMapState("rtp-state", Address.class, ObjectNodeInfo.class);
+        final RuntimeContext context = getRuntimeContext();
+        final StateTtlConfig ttlConfig = StateTtlConfig
+                .newBuilder(fireInterval)
+                .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
+                .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+                .cleanupFullSnapshot()
+                .build();
+
+        final MapStateDescriptor<Address, ObjectNodeInfo> sipDescriptor =
+                new MapStateDescriptor<>("sip-state", Address.class, ObjectNodeInfo.class);
+        sipDescriptor.enableTimeToLive(ttlConfig);
+        sipDoubleDirState = context.getMapState(sipDescriptor);
+
+        final MapStateDescriptor<Address, ObjectNodeInfo> rtpDescriptor =
+                new MapStateDescriptor<>("rtp-state", Address.class, ObjectNodeInfo.class);
+        rtpDescriptor.enableTimeToLive(ttlConfig);
+        rtpState = context.getMapState(rtpDescriptor);
     }
 
     @Override
@@ -52,7 +71,7 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Integer, ObjectNo
                 Tuple2.of(record.getResponderSdpConnectIp(), record.getResponderSdpMediaPort()));
         sipDoubleDirState.put(address, new ObjectNodeInfo(obj,
                 ctx.timerService().currentProcessingTime() + fireInterval.toMilliseconds()));
-        registerNextFireTimestamp(ctx.timerService(), fireInterval);
+        registerNextFireTimestamp(ctx.timerService(), ctx.getCurrentKey().hashCode());
     }
 
     @Override
@@ -79,7 +98,7 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Integer, ObjectNo
             rtpState.put(address, new ObjectNodeInfo(obj,
                     ctx.timerService().currentProcessingTime() + fireInterval.toMilliseconds()));
         }
-        registerNextFireTimestamp(ctx.timerService(), fireInterval);
+        registerNextFireTimestamp(ctx.timerService(), ctx.getCurrentKey().hashCode());
     }
 
     @Override
@@ -112,9 +131,9 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Integer, ObjectNo
         while (sipIterator.hasNext()) {
             final Map.Entry<Address, ObjectNodeInfo> entry = sipIterator.next();
             if (entry.getValue().getExpireTime() <= timestamp) {
-               sipIterator.remove();
+                sipIterator.remove();
             }
         }
-        registerNextFireTimestamp(ctx.timerService(), fireInterval);
+        ctx.timerService().registerProcessingTimeTimer(ctx.timerService().currentProcessingTime() + INTERVAL);
     }
 }

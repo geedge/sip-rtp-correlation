@@ -3,9 +3,7 @@ package com.zdjizhi.flink.voip;
 import com.zdjizhi.flink.voip.conf.FusionConfiguration;
 import com.zdjizhi.flink.voip.error.ErrorHandler;
 import com.zdjizhi.flink.voip.formats.JsonNodeSerializationSchema;
-import com.zdjizhi.flink.voip.functions.SIPPairingFunction;
-import com.zdjizhi.flink.voip.functions.TypeSplitFunction;
-import com.zdjizhi.flink.voip.functions.VoIPFusionFunction;
+import com.zdjizhi.flink.voip.functions.*;
 import com.zdjizhi.flink.voip.records.Record;
 import com.zdjizhi.flink.voip.records.SIPRecord;
 import org.apache.flink.api.java.functions.KeySelector;
@@ -72,25 +70,14 @@ public class FusionApp {
         final DataStream<ObjectNode> rtpDataStream = splitsRecordsOperator
                 .getSideOutput(TypeSplitFunction.RTP_OUTPUT_TAG);
 
-        final KeySelector<ObjectNode, Tuple2<Integer, String>> sipKeySelector = new KeySelector<>() {
-            @Override
-            public Tuple2<Integer, String> getKey(ObjectNode obj) throws Exception {
-                final SIPRecord record = new SIPRecord(obj);
-                return Tuple2.of(record.getVSysID(), record.getCallID());
-            }
-        };
-
         // Process SIP data to create a double directional stream using SIPPairingFunction.
         final SingleOutputStreamOperator<ObjectNode> sipDoubleDirOperator = sipDataStream
-                .keyBy(sipKeySelector)
+                .keyBy(new SIPKeySelector())
                 .process(new SIPPairingFunction())
                 .name("PairingOneWayToDoubleStream")
                 .uid("pairing-one-way-to-double");
 
-        final KeySelector<ObjectNode, Integer> vSysSelector = obj -> {
-            final Record record = new Record(obj);
-            return record.getVSysID();
-        };
+        final KeySelector<ObjectNode, Integer> vSysSelector = new VSysIDKeySelector();
 
         // Fusion SIP data and RTP data to VoIP data.
         final SingleOutputStreamOperator<ObjectNode> voIpOperator = rtpDataStream

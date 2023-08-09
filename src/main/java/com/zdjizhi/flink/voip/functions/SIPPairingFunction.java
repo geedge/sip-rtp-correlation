@@ -4,6 +4,8 @@ import com.zdjizhi.flink.voip.conf.FusionConfigs;
 import com.zdjizhi.flink.voip.records.Record;
 import com.zdjizhi.flink.voip.records.StreamDir;
 import org.apache.flink.api.common.state.MapState;
+import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
@@ -30,9 +32,20 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple2<Integer, Str
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        fireInterval = Time.minutes(getGlobalConfiguration()
-                .get(FusionConfigs.SIP_STATE_CLEAR_INTERVAL));
-        mapState = getMapState("sip-state", Address.class, ObjectNodeInfo.class);
+        int minutes = getGlobalConfiguration().get(FusionConfigs.SIP_STATE_CLEAR_INTERVAL);
+        fireInterval = Time.minutes(minutes);
+
+        final MapStateDescriptor<Address, ObjectNodeInfo> descriptor =
+                new MapStateDescriptor<>("sip-state", Address.class, ObjectNodeInfo.class);
+
+        final StateTtlConfig ttlConfig = StateTtlConfig
+                .newBuilder(fireInterval)
+                .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
+                .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+                .cleanupFullSnapshot()
+                .build();
+        descriptor.enableTimeToLive(ttlConfig);
+        mapState = getRuntimeContext().getMapState(descriptor);
     }
 
     @Override
@@ -65,7 +78,7 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple2<Integer, Str
             // If SIP is a double stream, pairing isn't required, directly output the record.
             out.collect(value);
         }
-        registerNextFireTimestamp(ctx.timerService(), fireInterval);
+        registerNextFireTimestamp(ctx.timerService(), ctx.getCurrentKey().hashCode());
     }
 
     @Override
@@ -79,6 +92,6 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple2<Integer, Str
                 iterator.remove();
             }
         }
-        registerNextFireTimestamp(ctx.timerService(), fireInterval);
+        ctx.timerService().registerProcessingTimeTimer(ctx.timerService().currentProcessingTime() + INTERVAL);
     }
 }
