@@ -48,6 +48,7 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
                 .newBuilder(fireInterval)
                 .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
                 .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+                .useProcessingTime()
                 .cleanupFullSnapshot()
                 .build();
 
@@ -58,15 +59,29 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
         sipDoubleDirState = context.getState(sipDescriptor);
     }
 
+    // SIP
     @Override
     public void processElement2(ObjectNode obj,
                                 KeyedCoProcessFunction<Tuple2<Integer, Address>, ObjectNode, ObjectNode, ObjectNode>.Context ctx,
                                 Collector<ObjectNode> out) throws Exception {
-        sipDoubleDirState.update(new ObjectNodeInfo(obj,
-                ctx.timerService().currentProcessingTime() + fireInterval.toMilliseconds()));
+        final ObjectNodeInfo info = rtpState.value();
+        if (info != null) {
+            final Record record = new Record(info.getObj());
+            record.merge(obj)
+                    .setString(Record.F_COMMON_SCHEMA_TYPE, SchemaType.VOIP.getValue());
+            out.collect(info.getObj());
+            if (record.getStreamDir() != StreamDir.DOUBLE.getValue()) {
+                sipDoubleDirState.update(new ObjectNodeInfo(obj,
+                        ctx.timerService().currentProcessingTime() + fireInterval.toMilliseconds()));
+            }
+        } else {
+            sipDoubleDirState.update(new ObjectNodeInfo(obj,
+                    ctx.timerService().currentProcessingTime() + fireInterval.toMilliseconds()));
+        }
         registerNextFireTimestamp(ctx.timerService(), ctx.getCurrentKey().hashCode());
     }
 
+    // RTP
     @Override
     public void processElement1(ObjectNode obj,
                                 KeyedCoProcessFunction<Tuple2<Integer, Address>, ObjectNode, ObjectNode, ObjectNode>.Context ctx,
@@ -99,30 +114,16 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
                         KeyedCoProcessFunction<Tuple2<Integer, Address>, ObjectNode, ObjectNode, ObjectNode>.OnTimerContext ctx,
                         Collector<ObjectNode> out) throws Exception {
         final ObjectNodeInfo rtpInfo = rtpState.value();
-        if (rtpInfo != null) {
-            final ObjectNode obj = rtpInfo.getObj();
-            final Record record = new Record(obj);
-            record.merge(obj)
-                    .setString(Record.F_COMMON_SCHEMA_TYPE, SchemaType.VOIP.getValue());
-            out.collect(obj);
-
-            if (record.getStreamDir() == StreamDir.DOUBLE.getValue()
-                    || rtpInfo.getTimes() >= MAX_RTP_LINES - 1) {
-                sipDoubleDirState.clear();
-            } else { // Save the number of fused RTP unidirectional streams
-                rtpInfo.setTimes(rtpInfo.getTimes() + 1);
-                sipDoubleDirState.update(rtpInfo);
-            }
-
-            if (rtpInfo.getExpireTime() <= timestamp) {
-                rtpState.clear();
-            }
+        if (rtpInfo != null && rtpInfo.getExpireTime() <= timestamp) {
+            out.collect(rtpInfo.getObj());
+            rtpState.clear();
         }
-
         final ObjectNodeInfo sipInfo = sipDoubleDirState.value();
         if (sipInfo != null && sipInfo.getExpireTime() <= timestamp) {
             sipDoubleDirState.clear();
         }
-        registerIntervalFireTimestamp(ctx.timerService());
+        if (rtpInfo != null || sipInfo != null) {
+            registerIntervalFireTimestamp(ctx.timerService());
+        }
     }
 }

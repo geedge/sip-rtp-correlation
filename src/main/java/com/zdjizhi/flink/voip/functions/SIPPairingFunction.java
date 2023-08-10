@@ -7,7 +7,6 @@ import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.time.Time;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
@@ -40,6 +39,7 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple3<Integer, Str
                 .newBuilder(fireInterval)
                 .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
                 .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+                .useProcessingTime()
                 .cleanupFullSnapshot()
                 .build();
         descriptor.enableTimeToLive(ttlConfig);
@@ -80,9 +80,11 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple3<Integer, Str
                         KeyedProcessFunction<Tuple3<Integer, String, Address>, ObjectNode, ObjectNode>.OnTimerContext ctx,
                         Collector<ObjectNode> out) throws Exception {
         final ObjectNodeInfo info = valueState.value();
-        if (info != null && info.getExpireTime() <= timestamp) {
-            valueState.clear();
+        if (info != null) {
+            if (info.getExpireTime() <= timestamp) {
+                valueState.clear();
+            }
+            registerIntervalFireTimestamp(ctx.timerService());
         }
-        registerIntervalFireTimestamp(ctx.timerService());
     }
 }
