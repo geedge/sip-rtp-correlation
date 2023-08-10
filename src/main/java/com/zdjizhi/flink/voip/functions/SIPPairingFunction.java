@@ -54,9 +54,6 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple3<Integer, Str
         final Record record = new Record(value);
         // When SIP is a one-way stream.
         if (StreamDir.DOUBLE.getValue() != record.getStreamDir()) {
-            // Create an Address instance based on server and client IPs and ports.
-            final Address address = Address.of(Tuple2.of(record.getClientIp(), record.getClientPort()),
-                    Tuple2.of(record.getServerIp(), record.getServerPort()));
             // If the address is already stored in the mapState and has the opposite stream direction,
             // merge the SIP records, change the stream direction to DOUBLE, and output the merged record.
             final ObjectNodeInfo info = valueState.value();
