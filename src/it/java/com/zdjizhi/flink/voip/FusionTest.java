@@ -78,7 +78,9 @@ public class FusionTest {
                 .name("VoIPFusion")
                 .uid("voip-fusion");
 
-        voIpOperator.print();
+        voIpOperator.addSink(new DoNothingSink())
+                .name("DoNothingSink")
+                .setParallelism(1);
 
         env.execute("VoIP Fusion Job");
     }
