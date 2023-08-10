@@ -1,10 +1,10 @@
-# flink-voip-fusion
+# SIP RTP Correlation
 
 ## 简介
 
-VoIP 数据融合项目是一个使用 Apache Flink 实现的实时数据处理项目，旨在从 Kafka 中读取 SIP（Session Initiation Protocol）和 RTP（Real-time Transport Protocol）数据，将它们融合成完整的 VoIP（Voice over Internet Protocol）通话数据。
+SIP RTP Correlation 项目是一个使用 Apache Flink 实现的实时数据处理项目，旨在从 Kafka 中读取 SIP（Session Initiation Protocol）和 RTP（Real-time Transport Protocol）数据，将它们融合成完整的 VoIP（Voice over Internet Protocol）通话数据。
 
-VoIP 数据融合项目可以用于实时监控和分析 VoIP 通话数据，提取关键指标，以及进行实时报警和诊断。
+SIP RTP Correlation 项目可以用于实时监控和分析 VoIP 通话数据，提取关键指标，以及进行实时报警和诊断。
 
 ## 编译和打包
 
@@ -17,7 +17,7 @@ mvn clean package
 
 使用以下命令运行Flink任务：
 ```shell
-flink run -c className path/to/flink-voip-fusion-xxx.jar
+flink run -c com.zdjizhi.flink.voip.CorrelateApp path/to/sip-rtp-correlation-<version>.jar
 ```
 
 ## 配置项说明

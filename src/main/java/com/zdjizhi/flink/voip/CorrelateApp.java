@@ -1,63 +1,64 @@
 package com.zdjizhi.flink.voip;
 
+import com.zdjizhi.flink.voip.conf.FusionConfiguration;
+import com.zdjizhi.flink.voip.error.ErrorHandler;
+import com.zdjizhi.flink.voip.formats.JsonNodeSerializationSchema;
 import com.zdjizhi.flink.voip.functions.*;
-import org.apache.flink.api.common.time.Time;
+import com.zdjizhi.flink.voip.records.Record;
+import com.zdjizhi.flink.voip.records.SIPRecord;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.formats.json.JsonNodeDeserializationSchema;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 
-import java.util.Objects;
+import static com.zdjizhi.flink.voip.conf.FusionConfigs.*;
 
-// Integration test main class
-public class FusionTest {
+/**
+ * The main class for running the SIP RTP Correlation application.
+ *
+ * @author chaoc
+ * @since 1.0
+ */
+public class CorrelateApp {
 
     public static void main(String[] args) throws Exception {
-        final Configuration envConfig = new Configuration();
-        envConfig.setInteger("rest.port", 18081);
-        envConfig.setBoolean("rest.flamegraph.enabled", true);
-        envConfig.setString("metrics.reporter.influxdb.factory.class", "org.apache.flink.metrics.influxdb.InfluxdbReporterFactory");
-        envConfig.setString("metrics.reporter.influxdb.scheme", "http");
-        envConfig.setString("metrics.reporter.influxdb.host", "127.0.0.1");
-        envConfig.setInteger("metrics.reporter.influxdb.port", 8086);
-        envConfig.setString("metrics.reporter.influxdb.db", "flinks");
-        envConfig.setString("metrics.reporter.influxdb.interval", "5 SECONDS");
 
-        final StreamExecutionEnvironment env = StreamExecutionEnvironment
-                .createLocalEnvironmentWithWebUI(envConfig);
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        final ParameterTool tool = ParameterTool.fromPropertiesFile(
-                args.length > 0 ? args[0] :
-                        Objects.requireNonNull(
-                                FusionTest.class.getResource("/application-test.properties")).getPath()
-        );
+        // param check
+        if (args.length < 1) {
+            throw new IllegalArgumentException("Error: Not found properties path. " +
+                    "\nUsage: flink -c xxx xxx.jar app.properties.");
+        }
 
-        final CheckpointConfig checkpointConfig = env.getCheckpointConfig();
-        env.enableCheckpointing(Time.minutes(1)
-                .toMilliseconds(), CheckpointingMode.AT_LEAST_ONCE);
-        checkpointConfig.setCheckpointTimeout(Time.minutes(2).toMilliseconds());
-        checkpointConfig.setCheckpointStorage("file://" + System.getProperty("java.io.tmpdir"));
-       /* checkpointConfig.setCheckpointStorage(
-                Objects.requireNonNull(
-                        FusionTest.class.getResource("/")).toString());*/
+        final ParameterTool tool = ParameterTool.fromPropertiesFile(args[0]);
 
         final Configuration config = tool.getConfiguration();
         env.getConfig().setGlobalJobParameters(config);
-        env.setParallelism(8);
 
-        final SingleOutputStreamOperator<ObjectNode> sourceStream = env.addSource(new DataGenSource())
-                .name("DataGenSource")
-                .setParallelism(1);
+        final FusionConfiguration fusionConfiguration = new FusionConfiguration(config);
+
+        final FlinkKafkaConsumer<ObjectNode> kafkaConsumer = new FlinkKafkaConsumer<>(
+                config.get(SOURCE_KAFKA_TOPIC),
+                new JsonNodeDeserializationSchema(),
+                fusionConfiguration
+                        .getProperties(SOURCE_KAFKA_PROPERTIES_PREFIX));
+
+        final DataStreamSource<ObjectNode> sourceStream = env.addSource(kafkaConsumer);
+
+        final ErrorHandler errorHandler = new ErrorHandler(config);
 
         // Process the data using the TypeSplitFunction and split it into separate DataStreams for SIP and RTP data
         final SingleOutputStreamOperator<ObjectNode> splitsRecordsOperator =
-                sourceStream
+                errorHandler.filterError(sourceStream)
                         .process(new TypeSplitFunction())
                         .name("SplitsRecordsBasedSchemaType")
                         .uid("splits-records-based-schema-type");
@@ -86,9 +87,12 @@ public class FusionTest {
                 .name("VoIPFusion")
                 .uid("voip-fusion");
 
-        voIpOperator.addSink(new DoNothingSink())
-                .name("DoNothingSink")
-                .setParallelism(1);
+        final FlinkKafkaProducer<ObjectNode> producer = new FlinkKafkaProducer<>(
+                config.get(SINK_KAFKA_TOPIC),
+                new JsonNodeSerializationSchema(),
+                fusionConfiguration.getProperties(SINK_KAFKA_PROPERTIES_PREFIX));
+
+        voIpOperator.addSink(producer);
 
         env.execute("VoIP Fusion Job");
     }
