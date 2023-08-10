@@ -9,7 +9,6 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -22,6 +21,14 @@ public class FusionTest {
     public static void main(String[] args) throws Exception {
         final Configuration envConfig = new Configuration();
         envConfig.setInteger("rest.port", 18081);
+        envConfig.setBoolean("rest.flamegraph.enabled", true);
+        envConfig.setString("metrics.reporter.influxdb.factory.class", "org.apache.flink.metrics.influxdb.InfluxdbReporterFactory");
+        envConfig.setString("metrics.reporter.influxdb.scheme", "http");
+        envConfig.setString("metrics.reporter.influxdb.host", "127.0.0.1");
+        envConfig.setInteger("metrics.reporter.influxdb.port", 8086);
+        envConfig.setString("metrics.reporter.influxdb.db", "flinks");
+        envConfig.setString("metrics.reporter.influxdb.interval", "5 SECONDS");
+
         final StreamExecutionEnvironment env = StreamExecutionEnvironment
                 .createLocalEnvironmentWithWebUI(envConfig);
 
@@ -36,7 +43,7 @@ public class FusionTest {
                 .toMilliseconds(), CheckpointingMode.AT_LEAST_ONCE);
         checkpointConfig.setCheckpointTimeout(Time.minutes(2).toMilliseconds());
         checkpointConfig.setCheckpointStorage("file://" + System.getProperty("java.io.tmpdir"));
-        /*checkpointConfig.setCheckpointStorage(
+       /* checkpointConfig.setCheckpointStorage(
                 Objects.requireNonNull(
                         FusionTest.class.getResource("/")).toString());*/
 
@@ -44,12 +51,13 @@ public class FusionTest {
         env.getConfig().setGlobalJobParameters(config);
         env.setParallelism(8);
 
-        final DataStreamSource<ObjectNode> sourceStream = env.addSource(new DataGenSource());
+        final SingleOutputStreamOperator<ObjectNode> sourceStream = env.addSource(new DataGenSource())
+                .name("DataGenSource")
+                .setParallelism(1);
 
         // Process the data using the TypeSplitFunction and split it into separate DataStreams for SIP and RTP data
         final SingleOutputStreamOperator<ObjectNode> splitsRecordsOperator =
                 sourceStream
-                        .name("DataGenSource")
                         .process(new TypeSplitFunction())
                         .name("SplitsRecordsBasedSchemaType")
                         .uid("splits-records-based-schema-type");
