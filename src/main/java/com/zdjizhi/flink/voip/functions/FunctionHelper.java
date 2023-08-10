@@ -42,7 +42,7 @@ public interface FunctionHelper extends RichFunction {
         return getRuntimeContext().getMapState(descriptor);
     }
 
-    int INTERVAL = 1000 * 60;
+    int INTERVAL = 1000 * 15;
 
     /**
      * Registers the next fire timestamp based on the given TimerService and factor.
