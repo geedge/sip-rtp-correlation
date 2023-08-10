@@ -40,7 +40,7 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
         final RuntimeContext context = getRuntimeContext();
         final ValueStateDescriptor<ObjectNodeInfo> sipDescriptor =
                 new ValueStateDescriptor<>("sip-state", ObjectNodeInfo.class);
-        sipDoubleDirState = context.getState(sipDescriptor);
+
         final ValueStateDescriptor<ObjectNodeInfo> rtpDescriptor =
                 new ValueStateDescriptor<>("rtp-state", ObjectNodeInfo.class);
 
@@ -55,6 +55,7 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
         sipDescriptor.enableTimeToLive(ttlConfig);
 
         rtpState = context.getState(rtpDescriptor);
+        sipDoubleDirState = context.getState(sipDescriptor);
     }
 
     @Override
