@@ -1,6 +1,5 @@
 package com.zdjizhi.flink.voip;
 
-import com.zdjizhi.flink.voip.formats.JsonNodeSerializationSchema;
 import com.zdjizhi.flink.voip.functions.*;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.functions.KeySelector;
