@@ -52,7 +52,6 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
                 .cleanupFullSnapshot()
                 .build();
 
-        rtpDescriptor.enableTimeToLive(ttlConfig);
         sipDescriptor.enableTimeToLive(ttlConfig);
 
         rtpState = context.getState(rtpDescriptor);
