@@ -17,7 +17,7 @@ mvn clean package
 
 使用以下命令运行Flink任务：
 ```shell
-flink run -c com.zdjizhi.flink.voip.CorrelateApp path/to/sip-rtp-correlation-<version>.jar
+flink run -c com.zdjizhi.flink.voip.CorrelateApp path/to/sip-rtp-correlation-<version>.jar application.properties
 ```
 
 ## 配置项说明
