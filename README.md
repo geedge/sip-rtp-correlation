@@ -31,8 +31,8 @@ flink run -c com.zdjizhi.flink.voip.CorrelateApp path/to/sip-rtp-correlation-<ve
 | error.records.output.enable | STRING              | N | False | 是否开启异常数据的输出 【IP 或 Port 为空】                  |
 | error.sink.kafka.topic      | STRING              | N |      | 异常数据输出到的 Kafka Topic 名                             |
 | error.sink.kafka.props.*    | MAP<STRING, STRING> | N |      | 异常数据输出的 Kafka 的 Properties                          |
-| sip.state.clear.interval.minutes | INT | 1 |      | SIP 单向流关联的窗口大小（单位：分钟） |
-| rtp.state.clear.interval.minutes | INT | 6 |      | SIP 和 RTP 关联的窗口大小（单位：分钟） |
+| sip.state.clear.interval.minutes | INT | N | 1 | SIP 单向流关联的窗口大小（单位：分钟） |
+| rtp.state.clear.interval.minutes | INT | N | 6 | SIP 和 RTP 关联的窗口大小（单位：分钟） |
 
 
 
