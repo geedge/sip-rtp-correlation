@@ -7,8 +7,6 @@ import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.Objects;
-
 /**
  * A KeySelector implementation that extracts the key(VSysID) from an ObjectNode.
  *
@@ -28,7 +26,7 @@ public class VSysIDKeySelector implements KeySelector<ObjectNode, Tuple2<Integer
     public Tuple2<Integer, Address> getKey(ObjectNode obj) throws Exception {
         final Record record = new Record(obj);
         final Address address;
-        if (Objects.equals(record.getSchemaType(), SchemaType.SIP.getValue())) {
+        if (record.getSchemaType() == SchemaType.SIP) {
             final SIPRecord sipRecord = new SIPRecord(obj);
             address = Address.of(
                     Tuple2.of(sipRecord.getOriginatorSdpConnectIp(), sipRecord.getOriginatorSdpMediaPort()),

@@ -3,7 +3,6 @@ package com.zdjizhi.flink.voip.data;
 import com.zdjizhi.flink.voip.records.Record;
 import com.zdjizhi.flink.voip.records.SIPRecord;
 import com.zdjizhi.flink.voip.records.SchemaType;
-import com.zdjizhi.flink.voip.records.StreamDir;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
@@ -45,7 +44,7 @@ public class RTPGenerator extends Generator<ObjectNode> {
 
         record.setString(Record.F_COMMON_SCHEMA_TYPE, SchemaType.RTP.getValue());
         record.setString(SIPRecord.F_CALL_ID, nextId());
-        record.setInt(SIPRecord.F_COMMON_STREAM_DIR, random.nextInt(4));
+        record.setInt(SIPRecord.F_COMMON_STREAM_DIR, random.nextInt(3) + 1);
 
         record.setString(Record.F_COMMON_SERVER_IP, nextIp());
         record.setInt(Record.F_COMMON_SERVER_PORT, nextPort());
@@ -57,7 +56,7 @@ public class RTPGenerator extends Generator<ObjectNode> {
     @Override
     protected ObjectNode afterState(ObjectNode v) {
         final Record record = new Record(v);
-        switch (StreamDir.of(record.getStreamDir())) {
+        switch (record.getStreamDir()) {
             case DOUBLE:
                 record.setInt(Record.F_COMMON_STREAM_DIR, random.nextInt(2) + 1);
                 break;

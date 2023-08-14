@@ -63,19 +63,19 @@ public class Record {
     /**
      * Get the schema type from the data record.
      *
-     * @return The schema type as a string.
+     * @return The schema type.
      */
-    public final String getSchemaType() {
-        return Record.getString(obj, F_COMMON_SCHEMA_TYPE);
+    public final SchemaType getSchemaType() {
+        return SchemaType.of(Record.getString(obj, F_COMMON_SCHEMA_TYPE));
     }
 
     /**
      * Get the stream direction from the data record.
      *
-     * @return The stream direction as an integer.
+     * @return The stream direction.
      */
-    public final int getStreamDir() {
-        return Record.getInt(obj, F_COMMON_STREAM_DIR);
+    public final StreamDir getStreamDir() {
+        return StreamDir.of(Record.getInt(obj, F_COMMON_STREAM_DIR));
     }
 
     /**

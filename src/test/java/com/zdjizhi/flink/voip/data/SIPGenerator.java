@@ -65,7 +65,7 @@ public class SIPGenerator extends Generator<ObjectNode> {
     @Override
     protected ObjectNode afterState(ObjectNode v) {
         final Record record = new Record(v);
-        switch (StreamDir.of(record.getStreamDir())) {
+        switch (record.getStreamDir()) {
             case C2S:
                 record.setInt(Record.F_COMMON_STREAM_DIR, StreamDir.S2C.getValue());
                 break;
