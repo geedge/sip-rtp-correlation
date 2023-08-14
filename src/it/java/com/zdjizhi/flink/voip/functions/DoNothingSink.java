@@ -1,7 +1,6 @@
 package com.zdjizhi.flink.voip.functions;
 
 import com.zdjizhi.flink.voip.records.Record;
-import com.zdjizhi.flink.voip.records.SchemaType;
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.metrics.MeterView;
@@ -31,7 +30,7 @@ public class DoNothingSink extends RichSinkFunction<ObjectNode> {
     @Override
     public void invoke(ObjectNode obj, Context context) throws Exception {
         Record record = new Record(obj);
-        switch (SchemaType.of(record.getSchemaType())) {
+        switch (record.getSchemaType()) {
             case RTP:
                 numRTPRecordsPreSecond.markEvent();
                 break;
