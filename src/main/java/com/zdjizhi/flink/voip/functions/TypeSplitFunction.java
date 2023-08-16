@@ -1,7 +1,6 @@
 package com.zdjizhi.flink.voip.functions;
 
 import com.zdjizhi.flink.voip.records.Record;
-import com.zdjizhi.flink.voip.records.SchemaType;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -33,7 +32,7 @@ public class TypeSplitFunction extends ProcessFunction<ObjectNode, ObjectNode> {
                                ProcessFunction<ObjectNode, ObjectNode>.Context ctx,
                                Collector<ObjectNode> out) throws Exception {
         final Record record = new Record(obj);
-        switch (SchemaType.of(record.getSchemaType())) {
+        switch (record.getSchemaType()) {
             case RTP:
                 ctx.output(RTP_OUTPUT_TAG, obj);
                 break;

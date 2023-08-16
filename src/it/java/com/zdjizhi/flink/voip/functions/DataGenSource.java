@@ -6,10 +6,10 @@ import com.zdjizhi.flink.voip.data.SIPGenerator;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.shaded.guava18.com.google.common.util.concurrent.RateLimiter;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
+import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 
 // Date Generate Source.
-public class DataGenSource extends RichSourceFunction<ObjectNode> implements FunctionHelper {
+public class DataGenSource extends RichParallelSourceFunction<ObjectNode> implements FunctionHelper {
 
     private transient SIPGenerator sipGenerator;
     private transient RTPGenerator rtpGenerator;
@@ -23,8 +23,10 @@ public class DataGenSource extends RichSourceFunction<ObjectNode> implements Fun
                 .get(TestConfigs.VALUABLE_DATA_PROPORTION);
         this.sipGenerator = new SIPGenerator(ratio);
         this.rtpGenerator = new RTPGenerator(ratio, sipGenerator);
-        this.rateLimiter = RateLimiter.create(getGlobalConfiguration()
-                .get(TestConfigs.DATA_GENERATE_RATE));
+        final Long rate = getGlobalConfiguration()
+                .get(TestConfigs.DATA_GENERATE_RATE);
+        this.rateLimiter = RateLimiter.create(
+                (int) (rate / getRuntimeContext().getNumberOfParallelSubtasks()));
         this.running = true;
     }
 

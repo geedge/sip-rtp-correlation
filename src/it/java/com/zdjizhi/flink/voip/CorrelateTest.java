@@ -53,7 +53,7 @@ public class CorrelateTest {
 
         final SingleOutputStreamOperator<ObjectNode> sourceStream = env.addSource(new DataGenSource())
                 .name("DataGenSource")
-                .setParallelism(1);
+                .setParallelism(4);
 
         // Process the data using the TypeSplitFunction and split it into separate DataStreams for SIP and RTP data
         final SingleOutputStreamOperator<ObjectNode> splitsRecordsOperator =

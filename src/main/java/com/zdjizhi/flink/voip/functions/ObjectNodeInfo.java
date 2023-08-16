@@ -16,18 +16,13 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.Obje
 class ObjectNodeInfo {
 
     // The ObjectNode containing data.
-    private final ObjectNode obj;
-
-    // The expiration time for the object.
-    private final long expireTime;
+    private ObjectNode obj;
 
     // The pair times for the object.
     @Setter
     private int times;
 
-    public ObjectNodeInfo(final ObjectNode obj, final long expireTime) {
-        this.obj = obj;
-        this.expireTime = expireTime;
-        this.times = 0;
+    public void incTimes() {
+        this.times = this.times + 1;
     }
 }

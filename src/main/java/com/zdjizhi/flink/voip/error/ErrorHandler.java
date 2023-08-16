@@ -110,8 +110,8 @@ class MeaninglessAddressProcessFunction extends ProcessFunction<ObjectNode, Obje
                 || IPUtil.internalIp(sipRecord.getResponderSdpConnectIp());
         boolean cond4 = IPUtil.isIPAddress(sipRecord.getOriginatorSdpConnectIp())
                 || IPUtil.isIPAddress(sipRecord.getResponderSdpConnectIp());
-        boolean cond5 = SchemaType.SIP.getValue().equalsIgnoreCase(sipRecord.getSchemaType());
-        boolean cond6 = StreamDir.DOUBLE.getValue() == sipRecord.getStreamDir() &&
+        boolean cond5 = SchemaType.SIP.equals(sipRecord.getSchemaType());
+        boolean cond6 = StreamDir.DOUBLE == sipRecord.getStreamDir() &&
                 IPUtil.internalIp(sipRecord.getResponderSdpConnectIp()) &&
                 IPUtil.internalIp(sipRecord.getOriginatorSdpConnectIp());
 

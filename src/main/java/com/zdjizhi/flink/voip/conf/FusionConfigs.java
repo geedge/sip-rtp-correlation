@@ -83,6 +83,6 @@ public class FusionConfigs {
     public static final ConfigOption<Integer> RTP_STATE_CLEAR_INTERVAL =
             ConfigOptions.key("rtp.state.clear.interval.minutes")
                     .intType()
-                    .defaultValue(3)
+                    .defaultValue(6)
                     .withDescription("The interval at which RTP state data should be cleared.");
 }
