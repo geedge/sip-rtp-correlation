@@ -104,16 +104,16 @@ class MeaninglessAddressProcessFunction extends ProcessFunction<ObjectNode, Obje
                 record.getServerPort() >= 0;
 
         final SIPRecord sipRecord = new SIPRecord(obj);
-        boolean cond2 = !IPUtil.isIPAddress(sipRecord.getOriginatorSdpConnectIp())
-                || IPUtil.internalIp(sipRecord.getOriginatorSdpConnectIp());
-        boolean cond3 = !IPUtil.isIPAddress(sipRecord.getResponderSdpConnectIp())
-                || IPUtil.internalIp(sipRecord.getResponderSdpConnectIp());
-        boolean cond4 = IPUtil.isIPAddress(sipRecord.getOriginatorSdpConnectIp())
-                || IPUtil.isIPAddress(sipRecord.getResponderSdpConnectIp());
+        boolean cond2 = !isIPAddress(sipRecord.getOriginatorSdpConnectIp())
+                || isInternalIp(sipRecord.getOriginatorSdpConnectIp());
+        boolean cond3 = !isIPAddress(sipRecord.getResponderSdpConnectIp())
+                || isInternalIp(sipRecord.getResponderSdpConnectIp());
+        boolean cond4 = isIPAddress(sipRecord.getOriginatorSdpConnectIp())
+                || isIPAddress(sipRecord.getResponderSdpConnectIp());
         boolean cond5 = SchemaType.SIP.equals(sipRecord.getSchemaType());
         boolean cond6 = StreamDir.DOUBLE == sipRecord.getStreamDir() &&
-                IPUtil.internalIp(sipRecord.getResponderSdpConnectIp()) &&
-                IPUtil.internalIp(sipRecord.getOriginatorSdpConnectIp());
+                isInternalIp(sipRecord.getResponderSdpConnectIp()) &&
+                isInternalIp(sipRecord.getOriginatorSdpConnectIp());
 
         // Both client and server addresses in the data are valid.
         if (cond1 && (
@@ -131,5 +131,22 @@ class MeaninglessAddressProcessFunction extends ProcessFunction<ObjectNode, Obje
                 LOG.debug("Meaningless record: {}", obj);
             }
         }
+    }
+
+    // ======================================================================================
+    // ----------------------------------- private helper -----------------------------------
+
+    private static boolean isIPAddress(final String ipaddr) {
+        if (null == ipaddr) {
+            return false;
+        }
+        return IPUtil.isIPAddress(ipaddr);
+    }
+
+    private static boolean isInternalIp(final String ipaddr) {
+        if (!isIPAddress(ipaddr)) {
+            return false;
+        }
+        return IPUtil.internalIp(ipaddr);
     }
 }
