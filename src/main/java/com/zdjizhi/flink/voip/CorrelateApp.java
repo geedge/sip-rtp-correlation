@@ -94,6 +94,6 @@ public class CorrelateApp {
 
         voIpOperator.addSink(producer);
 
-        env.execute("VoIP Fusion Job");
+        env.execute("SIP-RTP-CORRELATION");
     }
 }
