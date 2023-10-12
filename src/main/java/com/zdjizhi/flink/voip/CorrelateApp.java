@@ -4,8 +4,8 @@ import com.zdjizhi.flink.voip.conf.FusionConfiguration;
 import com.zdjizhi.flink.voip.error.ErrorHandler;
 import com.zdjizhi.flink.voip.formats.JsonNodeSerializationSchema;
 import com.zdjizhi.flink.voip.functions.*;
-import com.zdjizhi.flink.voip.records.Record;
-import com.zdjizhi.flink.voip.records.SIPRecord;
+import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -13,11 +13,12 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.formats.json.JsonNodeDeserializationSchema;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+
+import java.time.Duration;
 
 import static com.zdjizhi.flink.voip.conf.FusionConfigs.*;
 
@@ -52,7 +53,13 @@ public class CorrelateApp {
                 fusionConfiguration
                         .getProperties(SOURCE_KAFKA_PROPERTIES_PREFIX));
 
-        final DataStreamSource<ObjectNode> sourceStream = env.addSource(kafkaConsumer);
+        final DataStream<ObjectNode> sourceStream = env.addSource(kafkaConsumer)
+                .assignTimestampsAndWatermarks(
+                        WatermarkStrategy
+                                .<ObjectNode>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+                                .withTimestampAssigner((SerializableTimestampAssigner<ObjectNode>)
+                                        (element, recordTimestamp) ->
+                                                element.get("common_start_timestamp_ms").asLong()));
 
         final ErrorHandler errorHandler = new ErrorHandler(config);
 
@@ -92,7 +99,7 @@ public class CorrelateApp {
                 new JsonNodeSerializationSchema(),
                 fusionConfiguration.getProperties(SINK_KAFKA_PROPERTIES_PREFIX));
 
-        voIpOperator.addSink(producer);
+        voIpOperator.union(sipDoubleDirOperator).addSink(producer);
 
         env.execute("SIP-RTP-CORRELATION");
     }

@@ -26,7 +26,7 @@ public interface FunctionHelper extends RichFunction {
     }
 
     default void registerNextFireTimestamp(TimerService timerService, long interval) {
-        long current = timerService.currentProcessingTime();
-        timerService.registerProcessingTimeTimer(current + interval);
+        long current = timerService.currentWatermark();
+        timerService.registerEventTimeTimer(current + interval);
     }
 }
