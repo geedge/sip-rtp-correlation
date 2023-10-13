@@ -28,7 +28,8 @@ flink run -c com.zdjizhi.flink.voip.CorrelateApp path/to/sip-rtp-correlation-<ve
 | source.kafka.props.*        | MAP<STRING, STRING> | Y |  | 将要读取的 Kafka 的 Properties                              |
 | sink.kafka.topic            | STRING              | Y |  | 将合成的 VoIP 及 未关联成功的 RTP 数据写出的 Kafka Topic 名 |
 | sink.kafka.props.*          | MAP<STRING, STRING> | Y |  | 数据输出的 Kafka 的 Properties                              |
-| error.records.output.enable | STRING              | N | False | 是否开启异常数据的输出 【IP 或 Port 为空】                  |
+| error.records.output.enable | BOOLEAN   | N | False | 是否开启异常数据的输出 【IP 或 Port 为空】                  |
+| determine.intranet.ip.be.abnormal | BOOLEAN | N | True | SIP 中协商四元组中存在内网 IP 地址时，是否将其判定为异常数据 |
 | error.sink.kafka.topic      | STRING              | N |      | 异常数据输出到的 Kafka Topic 名                             |
 | error.sink.kafka.props.*    | MAP<STRING, STRING> | N |      | 异常数据输出的 Kafka 的 Properties                          |
 | sip.state.clear.interval.minutes | INT | N | 1 | SIP 单向流关联的窗口大小（单位：分钟） |

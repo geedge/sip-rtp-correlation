@@ -3,6 +3,7 @@ package com.zdjizhi.flink.voip.error;
 import com.zdjizhi.flink.voip.conf.FusionConfigs;
 import com.zdjizhi.flink.voip.conf.FusionConfiguration;
 import com.zdjizhi.flink.voip.formats.JsonNodeSerializationSchema;
+import com.zdjizhi.flink.voip.functions.FunctionHelper;
 import com.zdjizhi.flink.voip.records.Record;
 import com.zdjizhi.flink.voip.records.SIPRecord;
 import com.zdjizhi.flink.voip.records.SchemaType;
@@ -88,9 +89,18 @@ public class ErrorHandler {
  * The MeaninglessAddressProcessFunction is a custom ProcessFunction used to check for records
  * with invalid or meaningless addresses and ports. It separates them into the invalid output tag if necessary.
  */
-class MeaninglessAddressProcessFunction extends ProcessFunction<ObjectNode, ObjectNode> {
+class MeaninglessAddressProcessFunction extends ProcessFunction<ObjectNode, ObjectNode> implements FunctionHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(MeaninglessAddressProcessFunction.class);
+
+    private transient boolean determineIntranetIpBeAbnormal;
+
+    @Override
+    public void open(Configuration parameters) throws Exception {
+        super.open(parameters);
+        final Configuration config = getGlobalConfiguration();
+        determineIntranetIpBeAbnormal = config.get(FusionConfigs.DETERMINE_INTRANET_IP_BE_ABNORMAL);
+    }
 
     @Override
     public void processElement(ObjectNode obj,
@@ -100,20 +110,20 @@ class MeaninglessAddressProcessFunction extends ProcessFunction<ObjectNode, Obje
         // Check for invalid or meaningless addresses and ports
         boolean cond1 = StringUtils.isNotBlank(record.getClientIp()) &&
                 StringUtils.isNotBlank(record.getServerIp()) &&
-                record.getClientPort() >= 0 &&
-                record.getServerPort() >= 0;
+                record.getClientPort() > 0 &&
+                record.getServerPort() > 0;
 
         final SIPRecord sipRecord = new SIPRecord(obj);
         boolean cond2 = !isIPAddress(sipRecord.getOriginatorSdpConnectIp())
-                || isInternalIp(sipRecord.getOriginatorSdpConnectIp());
+                || (!determineIntranetIpBeAbnormal || isInternalIp(sipRecord.getOriginatorSdpConnectIp()));
         boolean cond3 = !isIPAddress(sipRecord.getResponderSdpConnectIp())
-                || isInternalIp(sipRecord.getResponderSdpConnectIp());
+                || (!determineIntranetIpBeAbnormal || isInternalIp(sipRecord.getResponderSdpConnectIp()));
         boolean cond4 = isIPAddress(sipRecord.getOriginatorSdpConnectIp())
                 || isIPAddress(sipRecord.getResponderSdpConnectIp());
         boolean cond5 = SchemaType.SIP.equals(sipRecord.getSchemaType());
         boolean cond6 = StreamDir.DOUBLE == sipRecord.getStreamDir() &&
-                isInternalIp(sipRecord.getResponderSdpConnectIp()) &&
-                isInternalIp(sipRecord.getOriginatorSdpConnectIp());
+                (!determineIntranetIpBeAbnormal || isInternalIp(sipRecord.getResponderSdpConnectIp())) &&
+                (!determineIntranetIpBeAbnormal || isInternalIp(sipRecord.getOriginatorSdpConnectIp()));
 
         // Both client and server addresses in the data are valid.
         if (cond1 && (
