@@ -57,6 +57,15 @@ public class FusionConfigs {
                             "If set to true, the error records will be sent to the specified Kafka topic.");
 
     /**
+     * Configuration option to determine whether intranet IP addresses should be considered abnormal.
+     */
+    public static final ConfigOption<Boolean> DETERMINE_INTRANET_IP_BE_ABNORMAL =
+            ConfigOptions.key("determine.intranet.ip.be.abnormal")
+                    .booleanType()
+                    .defaultValue(true)
+                    .withDescription("Specifies whether intranet IP addresses should be treated as abnormal.");
+
+    /**
      * Configuration option for specifying the Kafka topic name where the error data will be sent.
      * This configuration option is used when the output of error records is enabled.
      */
