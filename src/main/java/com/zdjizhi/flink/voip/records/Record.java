@@ -20,31 +20,32 @@ public class Record {
     /**
      * 字段名：数据记录中的所属 vsys
      */
-    public static final String F_COMMON_VSYS_ID = "common_vsys_id";
+    public static final String F_COMMON_VSYS_ID = "vsys_id";
     /**
      * 字段名：数据记录中的字段类型
      */
-    public static final String F_COMMON_SCHEMA_TYPE = "common_schema_type";
+    public static final String F_COMMON_SCHEMA_TYPE = "decoded_as";
     /**
      * 字段名：数据记录中的流类型
      */
+    // TODO
     public static final String F_COMMON_STREAM_DIR = "common_stream_dir";
     /**
      * 字段名：数据记录中的服务端地址
      */
-    public static final String F_COMMON_SERVER_IP = "common_server_ip";
+    public static final String F_COMMON_SERVER_IP = "server_ip";
     /**
      * 字段名：数据记录中的服务端端口
      */
-    public static final String F_COMMON_SERVER_PORT = "common_server_port";
+    public static final String F_COMMON_SERVER_PORT = "server_port";
     /**
      * 字段名：数据记录中的客户端地址
      */
-    public static final String F_COMMON_CLIENT_IP = "common_client_ip";
+    public static final String F_COMMON_CLIENT_IP = "client_ip";
     /**
      * 字段名：数据记录中的客户端端口
      */
-    public static final String F_COMMON_CLIENT_PORT = "common_client_port";
+    public static final String F_COMMON_CLIENT_PORT = "client_port";
 
     /**
      * ObjectNode data.
