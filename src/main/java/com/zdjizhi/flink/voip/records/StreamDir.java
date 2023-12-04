@@ -48,4 +48,25 @@ public enum StreamDir {
         }
         throw new IllegalArgumentException("Unknown StreamDir value '" + value + "'.");
     }
+
+    /**
+     * Get the StreamDir enum based on the provided flags value.
+     *
+     * @param flags The flags.
+     * @return The corresponding StreamDir enum.
+     * @throws IllegalArgumentException if the provided value does not match any known StreamDir.
+     */
+    public static StreamDir ofFlags(long flags) {
+        int v = 0;
+        if ((flags & 8192) == 8192) {
+            v += 1;
+        }
+        if ((flags & 16384) == 16384) {
+            v += 2;
+        }
+        if ((flags & 32768) == 32768) {
+            v = 3;
+        }
+        return of(v);
+    }
 }
