@@ -59,7 +59,7 @@ public class CorrelateApp {
                                 .<ObjectNode>forBoundedOutOfOrderness(Duration.ofSeconds(5))
                                 .withTimestampAssigner((SerializableTimestampAssigner<ObjectNode>)
                                         (element, recordTimestamp) ->
-                                                element.get("common_start_timestamp_ms").asLong()));
+                                                element.get("start_timestamp_ms").asLong()));
 
         final ErrorHandler errorHandler = new ErrorHandler(config);
 
