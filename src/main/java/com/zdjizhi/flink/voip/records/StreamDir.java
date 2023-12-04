@@ -64,9 +64,6 @@ public enum StreamDir {
         if ((flags & 16384) == 16384) {
             v += 2;
         }
-        if ((flags & 32768) == 32768) {
-            v = 3;
-        }
         return of(v);
     }
 }
