@@ -183,7 +183,7 @@ public class Record {
      */
     public static long getLong(final ObjectNode obj, final String field, final long defaultValue) {
         final JsonNode node = obj.get(field);
-        return node != null && node.isLong() ? node.asLong(defaultValue) : defaultValue;
+        return node != null && node.isNumber() ? node.asLong() : defaultValue;
     }
 
     /**
