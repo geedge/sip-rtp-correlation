@@ -24,6 +24,18 @@
         <jackson.version>2.13.2.20220328</jackson.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>platform-releases</id>
+            <url>http://192.168.40.153:8099/content/repositories/platform-release</url>
+            <uniqueVersion>true</uniqueVersion>
+        </repository>
+        <snapshotRepository>
+            <id>platform-snapshots</id>
+            <url>http://192.168.40.153:8099/content/repositories/platform-snapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.flink</groupId>
