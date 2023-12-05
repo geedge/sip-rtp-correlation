@@ -20,31 +20,35 @@ public class Record {
     /**
      * 字段名：数据记录中的所属 vsys
      */
-    public static final String F_COMMON_VSYS_ID = "common_vsys_id";
+    public static final String F_COMMON_VSYS_ID = "vsys_id";
     /**
      * 字段名：数据记录中的字段类型
      */
-    public static final String F_COMMON_SCHEMA_TYPE = "common_schema_type";
+    public static final String F_COMMON_SCHEMA_TYPE = "decoded_as";
     /**
      * 字段名：数据记录中的流类型
      */
     public static final String F_COMMON_STREAM_DIR = "common_stream_dir";
     /**
+     * 字段名：数据记录中的流类型的 Flags
+     */
+    public static final String F_FLAGS = "flags";
+    /**
      * 字段名：数据记录中的服务端地址
      */
-    public static final String F_COMMON_SERVER_IP = "common_server_ip";
+    public static final String F_COMMON_SERVER_IP = "server_ip";
     /**
      * 字段名：数据记录中的服务端端口
      */
-    public static final String F_COMMON_SERVER_PORT = "common_server_port";
+    public static final String F_COMMON_SERVER_PORT = "server_port";
     /**
      * 字段名：数据记录中的客户端地址
      */
-    public static final String F_COMMON_CLIENT_IP = "common_client_ip";
+    public static final String F_COMMON_CLIENT_IP = "client_ip";
     /**
      * 字段名：数据记录中的客户端端口
      */
-    public static final String F_COMMON_CLIENT_PORT = "common_client_port";
+    public static final String F_COMMON_CLIENT_PORT = "client_port";
 
     /**
      * ObjectNode data.
@@ -75,7 +79,7 @@ public class Record {
      * @return The stream direction.
      */
     public final StreamDir getStreamDir() {
-        return StreamDir.of(Record.getInt(obj, F_COMMON_STREAM_DIR));
+        return StreamDir.ofFlags(Record.getLong(obj, F_FLAGS));
     }
 
     /**
@@ -167,6 +171,30 @@ public class Record {
      */
     public static int getInt(final ObjectNode obj, final String field) {
         return getInt(obj, field, 0);
+    }
+
+    /**
+     * Gets a long value from the specified field in the ObjectNode.
+     *
+     * @param obj          The ObjectNode to get the value from.
+     * @param field        The name of the field.
+     * @param defaultValue The default value to return if the field is not found or is not a long.
+     * @return The long value from the field or the default value if the field is not found or is not a long.
+     */
+    public static long getLong(final ObjectNode obj, final String field, final long defaultValue) {
+        final JsonNode node = obj.get(field);
+        return node != null && node.isNumber() ? node.asLong() : defaultValue;
+    }
+
+    /**
+     * Gets a long value from the specified field in the ObjectNode.
+     *
+     * @param obj   The ObjectNode to get the value from.
+     * @param field The name of the field.
+     * @return The long value from the field or 0 if the field is not found or is not a long.
+     */
+    private static long getLong(final ObjectNode obj, final String field) {
+        return getLong(obj, field, 0L);
     }
 
     /**
