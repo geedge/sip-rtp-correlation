@@ -61,7 +61,8 @@ public class Record {
      * @return The VSys ID as an integer.
      */
     public int getVSysID() {
-        return Record.getInt(obj, F_COMMON_VSYS_ID);
+        int v = Record.getInt(obj, F_COMMON_VSYS_ID);
+        return v == 0 ? 1 : v;
     }
 
     /**
