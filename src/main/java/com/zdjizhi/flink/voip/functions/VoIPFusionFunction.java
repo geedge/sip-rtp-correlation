@@ -83,6 +83,7 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
             rtpRecord.merge(sipObj)
                     .setString(Record.F_COMMON_SCHEMA_TYPE, SchemaType.VOIP.getValue());
             out.collect(rtpObj);
+            iterator.remove();
 
             switch (entry.getKey()) {
                 case S2C:
