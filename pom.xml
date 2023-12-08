@@ -7,7 +7,7 @@
 
     <groupId>com.zdjizhi</groupId>
     <artifactId>sip-rtp-correlation</artifactId>
-    <version>1.1-rc2</version>
+    <version>1.1-rc3</version>
 
     <name>Flink : SIP-RTP : Correlation</name>
 
@@ -23,6 +23,18 @@
         <log4j.version>2.17.1</log4j.version>
         <jackson.version>2.13.2.20220328</jackson.version>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>platform-releases</id>
+            <url>http://192.168.40.153:8099/content/repositories/platform-release</url>
+            <uniqueVersion>true</uniqueVersion>
+        </repository>
+        <snapshotRepository>
+            <id>platform-snapshots</id>
+            <url>http://192.168.40.153:8099/content/repositories/platform-snapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>

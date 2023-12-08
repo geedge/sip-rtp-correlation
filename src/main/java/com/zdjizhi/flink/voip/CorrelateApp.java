@@ -99,7 +99,9 @@ public class CorrelateApp {
                 new JsonNodeSerializationSchema(),
                 fusionConfiguration.getProperties(SINK_KAFKA_PROPERTIES_PREFIX));
 
-        voIpOperator.union(sipDoubleDirOperator).addSink(producer);
+        voIpOperator
+                .union(sipDoubleDirOperator.getSideOutput(SIPPairingFunction.SIP_OUTPUT_TAG))
+                .addSink(producer);
 
         env.execute("SIP-RTP-CORRELATION");
     }

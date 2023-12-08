@@ -7,11 +7,13 @@ import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.time.Time;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.OutputTag;
 
 /**
  * A KeyedProcessFunction that pairs SIP records based on their addresses and stream direction.
@@ -22,6 +24,9 @@ import org.apache.flink.util.Collector;
  */
 public class SIPPairingFunction extends KeyedProcessFunction<Tuple3<Integer, String, Address>, ObjectNode, ObjectNode>
         implements FunctionHelper {
+
+    public static final OutputTag<ObjectNode> SIP_OUTPUT_TAG =
+            new OutputTag<>("unmatched-sip", TypeInformation.of(ObjectNode.class));
 
     private transient Time fireInterval;
 
@@ -63,7 +68,7 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple3<Integer, Str
                 out.collect(value);
                 valueState.clear();
             } else {
-                // If the address is not yet in the mapState.
+                // If the address is not yet in the valueState.
                 valueState.update(value);
             }
         } else {
@@ -77,6 +82,10 @@ public class SIPPairingFunction extends KeyedProcessFunction<Tuple3<Integer, Str
     public void onTimer(long timestamp,
                         KeyedProcessFunction<Tuple3<Integer, String, Address>, ObjectNode, ObjectNode>.OnTimerContext ctx,
                         Collector<ObjectNode> out) throws Exception {
+        final ObjectNode value = valueState.value();
+        if (value != null) {
+            ctx.output(SIP_OUTPUT_TAG, value);
+        }
         valueState.clear();
     }
 }
