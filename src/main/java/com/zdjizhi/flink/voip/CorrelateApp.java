@@ -103,6 +103,6 @@ public class CorrelateApp {
                 .union(sipDoubleDirOperator.getSideOutput(SIPPairingFunction.SIP_OUTPUT_TAG))
                 .addSink(producer);
 
-        env.execute("SIP-RTP-CORRELATION");
+        env.execute(config.get(JOB_NAME));
     }
 }
