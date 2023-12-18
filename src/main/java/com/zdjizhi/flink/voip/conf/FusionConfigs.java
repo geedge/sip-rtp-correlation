@@ -95,4 +95,13 @@ public class FusionConfigs {
                     .intType()
                     .defaultValue(6)
                     .withDescription("The interval at which RTP state data should be cleared.");
+
+    /**
+     * Configuration option for specifying the name of a job.
+     */
+    public static final ConfigOption<String> JOB_NAME =
+            ConfigOptions.key("job.name")
+                    .stringType()
+                    .defaultValue("correlation_sip_rtp_session")
+                    .withDescription("The name of current job.");
 }

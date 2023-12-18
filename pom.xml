@@ -7,7 +7,7 @@
 
     <groupId>com.zdjizhi</groupId>
     <artifactId>sip-rtp-correlation</artifactId>
-    <version>1.2-rc3</version>
+    <version>1.2.1</version>
 
     <name>Flink : SIP-RTP : Correlation</name>
 
