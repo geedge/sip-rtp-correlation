@@ -34,10 +34,10 @@ public class RecordTest {
         final ObjectNode obj = mapper.createObjectNode();
         final Record record = new Record(obj);
         record.setString(Record.F_COMMON_SCHEMA_TYPE, SchemaType.RTP.getValue());
-        assertEquals(SchemaType.RTP.getValue(), record.getSchemaType());
+        assertEquals(SchemaType.RTP, record.getSchemaType());
 
         obj.set(Record.F_COMMON_SCHEMA_TYPE, TextNode.valueOf(SchemaType.VOIP.getValue()));
-        assertEquals(SchemaType.VOIP.getValue(), record.getSchemaType());
+        assertEquals(SchemaType.VOIP, record.getSchemaType());
     }
 
     @Test
