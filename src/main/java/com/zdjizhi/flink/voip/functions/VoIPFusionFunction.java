@@ -1,9 +1,8 @@
 package com.zdjizhi.flink.voip.functions;
 
 import com.zdjizhi.flink.voip.conf.FusionConfigs;
-import com.zdjizhi.flink.voip.records.Record;
-import com.zdjizhi.flink.voip.records.SchemaType;
-import com.zdjizhi.flink.voip.records.StreamDir;
+import com.zdjizhi.flink.voip.records.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.common.state.*;
 import org.apache.flink.api.common.time.Time;
@@ -80,6 +79,8 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
             final ObjectNode rtpObj = entry.getValue();
             final Record rtpRecord = new Record(rtpObj);
 
+            completeOriginatorField(rtpRecord, new SIPRecord(sipObj));
+
             rtpRecord.merge(sipObj)
                     .setString(Record.F_COMMON_SCHEMA_TYPE, SchemaType.VOIP.getValue());
             out.collect(rtpObj);
@@ -121,6 +122,8 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
         final StreamDir streamDir = rtpRecord.getStreamDir();
         if (null != info) {
 
+            completeOriginatorField(rtpRecord, new SIPRecord(info.getObj()));
+
             rtpRecord.merge(info.getObj())
                     .setString(Record.F_COMMON_SCHEMA_TYPE, SchemaType.VOIP.getValue());
             out.collect(rtpObj);
@@ -150,9 +153,28 @@ public class VoIPFusionFunction extends KeyedCoProcessFunction<Tuple2<Integer, A
                         KeyedCoProcessFunction<Tuple2<Integer, Address>, ObjectNode, ObjectNode, ObjectNode>.OnTimerContext ctx,
                         Collector<ObjectNode> out) throws Exception {
         for (ObjectNode obj : rtpState.values()) {
+            final Record rtpRecord = new Record(obj);
+            rtpRecord.setInt(RTPRecord.F_ORIGINATOR_DIR, RTPRecord.OriginatorDir.UNKNOWN.getCode());
             out.collect(obj);
         }
         rtpState.clear();
         sipState.clear();
+    }
+
+    // ======================================================================
+    //                             PRIVATE HELPER
+    // ======================================================================
+
+    private void completeOriginatorField(final Record rtpRecord, final SIPRecord sipRecord) {
+        if (StringUtils.isNoneBlank(rtpRecord.getClientIp())) {
+            if (StringUtils.equals(sipRecord.getOriginatorSdpConnectIp(), rtpRecord.getClientIp())) {
+                rtpRecord.setInt(RTPRecord.F_ORIGINATOR_DIR, RTPRecord.OriginatorDir.C2S.getCode());
+                return;
+            } else if (StringUtils.equals(sipRecord.getResponderSdpConnectIp(), rtpRecord.getClientIp())) {
+                rtpRecord.setInt(RTPRecord.F_ORIGINATOR_DIR, RTPRecord.OriginatorDir.S2C.getCode());
+                return;
+            }
+        }
+        rtpRecord.setInt(RTPRecord.F_ORIGINATOR_DIR, RTPRecord.OriginatorDir.UNKNOWN.getCode());
     }
 }
