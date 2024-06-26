@@ -1,0 +1,232 @@
+job:
+  name: A Stream Example
+  parallelism: 1
+  active-pipeline:
+    - console
+
+source:
+  - name: session-records
+    type: kafka
+    option:
+      topic: SESSION-RECORD
+      properties:
+        bootstrap.servers: 192.168.44.12:9092
+        group.id: easy-stream-tester9
+        client.id: easy-stream-tester9
+    format: json
+    schema:
+      - name: session_id
+        data-type: BIGINT NOT NULL
+      - name: start_timestamp_ms
+        data-type: BIGINT NOT NULL
+        # row-time:
+      - name: start_timestamp
+        for: TO_TIMESTAMP_LTZ(start_timestamp_ms, 3)
+        watermark: start_timestamp - INTERVAL '5' MINUTE
+      - name: end_timestamp_ms
+        data-type: BIGINT NOT NULL
+      - name: decoded_as
+        data-type: STRING NOT NULL
+      - name: duration_ms
+        data-type: BIGINT NOT NULL
+      - name: tcp_handshake_latency_ms
+        data-type: BIGINT
+      - name: device_id
+        data-type: STRING NOT NULL
+      - name: out_link_id
+        data-type: BIGINT
+      - name: in_link_id
+        data-type: BIGINT
+      - name: device_tag
+        data-type: STRING
+      - name: data_center
+        data-type: STRING
+      - name: device_group
+        data-type: STRING
+      - name: sled_ip
+        data-type: STRING
+      - name: address_type
+        data-type: INT
+      - name: direction
+        data-type: INT
+      - name: t_vsys_id
+        data-type: BIGINT
+      - name: flags
+        data-type: BIGINT
+      - name: flags_identify_info
+        data-type: STRING
+      ## Treatment
+      - name: security_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: security_action
+        data-type: STRING
+      - name: monitor_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: shaping_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: sc_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: statistics_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: sc_rsp_raw
+        data-type: ARRAY<BIGINT>
+      - name: sc_rsp_decrypted
+        data-type: ARRAY<BIGINT>
+      - name: proxy_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: proxy_action
+        data-type: STRING
+      - name: proxy_pinning_status
+        data-type: INT
+      - name: proxy_intercept_status
+        data-type: INT
+      - name: proxy_passthrough_reason
+        data-type: STRING
+      - name: proxy_client_side_latency_ms
+        data-type: BIGINT
+      - name: proxy_server_side_latency_ms
+        data-type: BIGINT
+      - name: proxy_client_side_version
+        data-type: STRING
+      - name: proxy_server_side_version
+        data-type: STRING
+      - name: proxy_cert_verify
+        data-type: INT
+      - name: proxy_intercept_error
+        data-type: STRING
+      - name: monitor_mirrored_pkts
+        data-type: INT
+      - name: monitor_mirrored_bytes
+        data-type: INT
+      ## Source
+      - name: client_ip
+        data-type: STRING
+      - name: client_port
+        data-type: INT
+      - name: client_os_desc
+        data-type: STRING
+      - name: client_geolocation
+        data-type: STRING
+      - name: client_country
+        data-type: STRING
+      - name: client_super_administrative_area
+        data-type: STRING
+      - name: client_administrative_area
+        data-type: STRING
+      - name: client_sub_administrative_area
+        data-type: STRING
+      - name: client_asn
+        data-type: BIGINT
+      - name: subscriber_id
+        data-type: STRING
+      - name: imei
+        data-type: STRING
+      - name: imsi
+        data-type: STRING
+      - name: phone_number
+        data-type: STRING
+      - name: apn
+        data-type: STRING
+      ## Destination
+      - name: server_ip
+        data-type: STRING
+      - name: server_port
+        data-type: INT
+      - name: server_os_desc
+        data-type: STRING
+      - name: server_geolocation
+        data-type: STRING
+      - name: server_country
+        data-type: STRING
+      - name: server_super_administrative_area
+        data-type: STRING
+      - name: server_administrative_area
+        data-type: STRING
+      - name: server_sub_administrative_area
+        data-type: STRING
+      - name: server_asn
+        data-type: BIGINT
+      - name: server_fqdn
+        data-type: STRING
+      - name: server_domain
+        data-type: STRING
+      - name: fqdn_category_list
+        data-type: ARRAY<BIGINT>
+      ## Application
+      - name: app_transition
+        data-type: STRING
+      - name: app
+        data-type: STRING
+      - name: app_debug_info
+        data-type: STRING
+      - name: app_content
+        data-type: STRING
+      - name: app_extra_info
+        data-type: STRING
+      ## Protocol
+      - name: ip_protocol
+        data-type: STRING
+      - name: decoded_path
+        data-type: STRING
+      ## SIP
+      - name: sip_call_id
+        data-type: STRING
+      - name: sip_originator_description
+        data-type: STRING
+      - name: sip_responder_description
+        data-type: STRING
+      - name: sip_user_agent
+        data-type: STRING
+      - name: sip_server
+        data-type: STRING
+      - name: sip_originator_sdp_connect_ip
+        data-type: STRING
+      - name: sip_originator_sdp_media_port
+        data-type: INT
+      - name: sip_originator_sdp_media_type
+        data-type: STRING
+      - name: sip_originator_sdp_content
+        data-type: STRING
+      - name: sip_responder_sdp_connect_ip
+        data-type: STRING
+      - name: sip_responder_sdp_media_port
+        data-type: INT
+      - name: sip_responder_sdp_media_type
+        data-type: STRING
+      - name: sip_responder_sdp_content
+        data-type: STRING
+      - name: sip_duration_s
+        data-type: INT
+      - name: sip_bye
+        data-type: STRING
+      ## RTP
+      - name: rtp_payload_type_c2s
+        data-type: INT
+      - name: rtp_payload_type_s2c
+        data-type: INT
+      - name: rtp_pcap_path
+        data-type: STRING
+      - name: rtp_originator_dir
+        data-type: INT
+
+pipeline:
+  - name: console
+    category: PRINT
+    on: split-for-error
+  - name: split-for-error
+    category: SPLIT
+    on: session-records
+    splits:
+      # Invalid stream dir
+      - name: error1-records
+        where: STREAM_DIR(flags) != 1 && STREAM_DIR(flags) != 2 && STREAM_DIR(flags) != 3
+      # Invalid ip or port
+      - name: error2-records
+        where: NOT(IS_IP_ADDRESS(client_ip)) || NOT(IS_IP_ADDRESS(server_ip)) || client_port <= 0 || server_port <= 0
+#  - name: split-by-protocol
+#    category: SPLIT
+#    splits:
+#      - name: rtp-records
+#        where: "decoded_as == 'RTP'"
+#      - name: sip-records
+#        where: "decoded_as == 'SIP'"
