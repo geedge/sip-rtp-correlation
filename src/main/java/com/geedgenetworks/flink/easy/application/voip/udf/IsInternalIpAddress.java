@@ -6,7 +6,7 @@ import org.apache.flink.table.functions.ScalarFunction;
 
 import static com.zdjizhi.utils.IPUtil.isIPAddress;
 
-public class IsInternalIPAddress extends ScalarFunction {
+public class IsInternalIpAddress extends ScalarFunction {
 
     public @DataTypeHint("BOOLEAN") Boolean eval(String ipaddr) {
         if (!isIPAddress(ipaddr)) {

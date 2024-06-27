@@ -73,6 +73,11 @@
             <groupId>com.zdjizhi</groupId>
             <artifactId>galaxy</artifactId>
         </dependency>
+        <dependency>
+            <groupId>xyz.downgoon</groupId>
+            <artifactId>snowflake</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
         <!--  Easy Stream -->
         <dependency>
@@ -101,11 +106,27 @@
             <artifactId>easy-stream-split-pipeline</artifactId>
             <version>${easy.stream.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.geedgenetworks.flink</groupId>
+            <artifactId>easy-stream-correlate-pipeline</artifactId>
+            <version>${easy.stream.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.geedgenetworks.flink</groupId>
             <artifactId>easy-stream-kafka-connector</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.geedgenetworks.flink</groupId>
+            <artifactId>easy-stream-text-connector</artifactId>
+            <version>${easy.stream.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.geedgenetworks.flink</groupId>
+            <artifactId>easy-stream-socket-connector</artifactId>
+            <version>${easy.stream.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.geedgenetworks.flink</groupId>
             <artifactId>easy-stream-json-format</artifactId>
@@ -221,6 +242,10 @@
                     <exclusion>
                         <groupId>log4j</groupId>
                         <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-lang3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
