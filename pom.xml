@@ -111,6 +111,11 @@
             <artifactId>easy-stream-correlate-pipeline</artifactId>
             <version>${easy.stream.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.geedgenetworks.flink</groupId>
+            <artifactId>easy-stream-union-pipeline</artifactId>
+            <version>${easy.stream.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.geedgenetworks.flink</groupId>
