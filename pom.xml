@@ -463,39 +463,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <executions>
-                    <execution>
-                        <id>release-version-check</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireReleaseVersion>
-                                    <message>SNAPSHOT versions ${project.version} are not allowed.</message>
-                                </requireReleaseVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>snapshot-version-check</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireSnapshotVersion>
-                                    <message>Non-SNAPSHOT versions ${project.version} are not allowed.</message>
-                                </requireSnapshotVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
@@ -617,6 +584,39 @@
 
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0-M3</version>
+                    <executions>
+                        <execution>
+                            <id>release-version-check</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireReleaseVersion>
+                                        <message>SNAPSHOT versions ${project.version} are not allowed.</message>
+                                    </requireReleaseVersion>
+                                </rules>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>snapshot-version-check</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireSnapshotVersion>
+                                        <message>Non-SNAPSHOT versions ${project.version} are not allowed.</message>
+                                    </requireSnapshotVersion>
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
