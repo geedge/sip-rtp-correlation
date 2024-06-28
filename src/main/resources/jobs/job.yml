@@ -1,6 +1,6 @@
 job:
   name: correlation_sip_rtp_session
-  parallelism: 10
+  parallelism: 1
   active-pipeline:
     - only-voip-records
     - fusion-fail-records
@@ -1077,6 +1077,7 @@ pipeline:
             data-type: INT
       - name: rtp
         type: LIST
+        ttl: 6 minute
         schema:
           ## General
           - name: recv_time
@@ -1350,10 +1351,8 @@ pipeline:
         key-by: vsys_id, SORT_ADDRESS( sip_originator_sdp_connect_ip, sip_originator_sdp_media_port, sip_responder_sdp_connect_ip, sip_responder_sdp_media_port )
         # SIP
         process:
-          - if: '@sip.isNull'
-            then:
-              - SET sip FROM withColumns(recv_time to rtp_originator_dir)
-          - if: '@sip.isNotNull && @rtp.isNotNull && @rtp.cardinality() > 0'
+          - SET sip FROM withColumns(recv_time to rtp_originator_dir)
+          - if: '@rtp.isNotNull'
             then:
               - |-
                 FLAT OUTPUT ok FOR i IN rtp FROM 
@@ -1436,9 +1435,7 @@ pipeline:
       - on: rtp-records
         key-by: vsys_id, SORT_ADDRESS( client_ip, client_port, server_ip, server_port )
         process:
-          - if: '@sip.isNull'
-            then:
-              - APPEND rtp FROM withColumns(recv_time to rtp_originator_dir)
+          - APPEND rtp FROM withColumns(recv_time to rtp_originator_dir)
           - if: '@sip.isNotNull'
             then:
               - |-

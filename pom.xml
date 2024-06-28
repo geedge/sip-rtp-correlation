@@ -5,9 +5,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.zdjizhi</groupId>
+    <groupId>com.geedgenetworks.application</groupId>
     <artifactId>sip-rtp-correlation</artifactId>
-    <version>2.0</version>
+    <version>2.0-SNAPSHOT</version>
 
     <name>Flink : SIP-RTP : Correlation</name>
 
@@ -25,6 +25,24 @@
         <junit.version>5.8.0</junit.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>platform-releases</id>
+            <url>http://192.168.40.153:8099/content/repositories/platform-release</url>
+            <uniqueVersion>true</uniqueVersion>
+        </repository>
+        <snapshotRepository>
+            <id>platform-snapshots</id>
+            <url>http://192.168.40.153:8099/content/repositories/platform-snapshot</url>
+        </snapshotRepository>
+        <site>
+            <id>platform-site</id>
+            <url>
+                dav:http://192.168.40.153:8099/content/sites/platform-site/platform/application/sip-rtp-correlate-${project.version}
+            </url>
+        </site>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>central</id>
@@ -38,18 +56,6 @@
             </snapshots>
         </repository>
     </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>platform-releases</id>
-            <url>http://192.168.40.153:8099/content/repositories/platform-release</url>
-            <uniqueVersion>true</uniqueVersion>
-        </repository>
-        <snapshotRepository>
-            <id>platform-snapshots</id>
-            <url>http://192.168.40.153:8099/content/repositories/platform-snapshot</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -131,6 +137,11 @@
             <artifactId>easy-stream-socket-connector</artifactId>
             <version>${easy.stream.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.geedgenetworks.flink</groupId>
+            <artifactId>easy-stream-console-connector</artifactId>
+            <version>${easy.stream.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.geedgenetworks.flink</groupId>
@@ -177,6 +188,12 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-runtime-blink_${scala.binary.version}</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -446,6 +463,39 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>release-version-check</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireReleaseVersion>
+                                    <message>SNAPSHOT versions ${project.version} are not allowed.</message>
+                                </requireReleaseVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>snapshot-version-check</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireSnapshotVersion>
+                                    <message>Non-SNAPSHOT versions ${project.version} are not allowed.</message>
+                                </requireSnapshotVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
@@ -486,11 +536,115 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>jobs-copy-resources</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/site/jobs</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/jobs</directory>
+                                    <includes>
+                                        <include>*.yml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>site-resources</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>src/site</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-site</id>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <phase>site</phase>
+                        <configuration>
+                            <siteDirectory>${project.build.outputDirectory}</siteDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>site-deploy</id>
+                        <goals>
+                            <goal>stage-deploy</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.9.1</version>
+                    <configuration>
+                        <outputDirectory>${project.build.directory}/site</outputDirectory>
+                        <relativizeDecorationLinks>false</relativizeDecorationLinks>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.wagon</groupId>
+                            <artifactId>wagon-webdav-jackrabbit</artifactId>
+                            <version>2.8</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.apache.maven.doxia</groupId>
+                            <artifactId>doxia-module-markdown</artifactId>
+                            <version>1.9.1</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
 </project>
