@@ -1352,7 +1352,7 @@ pipeline:
         # SIP
         process:
           - SET sip FROM withColumns(recv_time to rtp_originator_dir)
-          - if: '@rtp.isNotNull'
+          - if: '@rtp.isNotNull && @rtp.cardinality > 0'
             then:
               - |-
                 FLAT OUTPUT ok FOR i IN rtp FROM 
@@ -1431,7 +1431,8 @@ pipeline:
                         @i.$rtp_pcap_path AS rtp_pcap_path,
                         ( @i.$client_ip == sip_originator_sdp_connect_ip).?(1, (@i.$client_ip == sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
               - TRUNCATE rtp
-          - SCHEDULING USING EVENT TIME FOR NOW + 6 * 60 * 1000
+          # TODO USE EVENT
+          - SCHEDULING USING PROCESS TIME FOR NOW + 6 * 60 * 1000
       - on: rtp-records
         key-by: vsys_id, SORT_ADDRESS( client_ip, client_port, server_ip, server_port )
         process:
@@ -1514,7 +1515,7 @@ pipeline:
                                 @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
                                 @i.$rtp_pcap_path AS rtp_pcap_path,
                                 ( @i.$client_ip == sip_originator_sdp_connect_ip).?(1, (@i.$client_ip == sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
-          - SCHEDULING USING EVENT TIME FOR NOW + 6 * 60 * 1000
+          - SCHEDULING USING PROCESS TIME FOR NOW + 6 * 60 * 1000
     schedule:
       - if: '@rtp.isNotNull && @rtp.cardinality > 0'
         then:
