@@ -587,6 +587,26 @@
 
         <pluginManagement>
             <plugins>
+                <!-- CI plugins -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.2</version>
+                    <executions>
+                        <execution>
+                            <id>release-deploy-check</id>
+                            <goals>
+                                <goal>get</goal>
+                            </goals>
+                            <configuration>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>easy-stream-common</artifactId>
+                                <version>${project.version}</version>
+                                <remoteRepositories>${project.distributionManagement.repository.url}</remoteRepositories>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>

@@ -8,14 +8,7 @@ stages:
   - test
   - build
 
-snapshot-version:
-  stage: check
-  script:
-    - mvn $MAVEN_CLI_OPTS enforcer:enforce@snapshot-version-check
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop" && $CI_PIPELINE_SOURCE == "merge_request_event"
-
-non-snapshot-version:
+release-version-check:
   stage: check
   script:
     - mvn $MAVEN_CLI_OPTS enforcer:enforce@release-version-check
@@ -27,7 +20,7 @@ non-snapshot-version:
         echo "The current version has not been deployed."
       fi
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /(^master$|^release\/)/ && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" && $CI_PIPELINE_SOURCE == "merge_request_event"
 
 test:
   stage: test
@@ -36,7 +29,6 @@ test:
   only:
     - merge_requests
 
-# Used for building snapshot versions on the develop branch.
 build:
   stage: build
   script:
@@ -44,4 +36,3 @@ build:
     - mvn clean site deploy -DskipTests
   only:
     - master
-    - /^release\//
