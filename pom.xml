@@ -513,27 +513,30 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
                     <execution>
-                        <id>jobs-copy-resources</id>
-                        <phase>pre-site</phase>
+                        <id>build-jobs</id>
+                        <phase>package</phase>
                         <goals>
-                            <goal>copy-resources</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/site/jobs</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/resources/jobs</directory>
-                                    <includes>
-                                        <include>*.yml</include>
-                                    </includes>
-                                </resource>
-                            </resources>
+                            <finalName>${project.artifactId}-yml-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>tools/dist/target.xml</descriptor>
+                            </descriptors>
                         </configuration>
                     </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
                     <execution>
                         <id>site-resources</id>
                         <phase>pre-site</phase>
