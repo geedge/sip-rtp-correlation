@@ -12,11 +12,11 @@ source:
     option:
       topic: VOIP-RECORD
       properties:
-        bootstrap.servers: 192.168.44.12:9094
+        bootstrap.servers: localhost:9092
         group.id: sip-rtp-correlation
         security.protocol: SASL_PLAINTEXT
         sasl.mechanism: PLAIN
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="galaxy2019";
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="example" password="example";
     format: json
     schema:
       ## General
@@ -296,10 +296,10 @@ sink:
     option:
       topic: VOIP-CONVERSATTON-RECORD
       properties:
-        bootstrap.servers: 192.168.44.12:9094
+        bootstrap.servers: localhost:9092
         security.protocol: SASL_PLAINTEXT
         sasl.mechanism: PLAIN
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="galaxy2019";
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="example" password="example";
     format: json
   # 关联成功的 VOIP
   - name: only-voip-records
@@ -308,10 +308,10 @@ sink:
     option:
       topic: VOIP-CONVERSATTON-RECORD
       properties:
-        bootstrap.servers: 192.168.44.12:9094
+        bootstrap.servers: localhost:9092
         security.protocol: SASL_PLAINTEXT
         sasl.mechanism: PLAIN
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="galaxy2019";
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="example" password="example";
     format: json
   # 没有关联成功的 SIP 和 RTP
   - name: fusion-fail-records
@@ -320,10 +320,10 @@ sink:
     option:
       topic: VOIP-CONVERSATTON-RECORD
       properties:
-        bootstrap.servers: 192.168.44.12:9094
+        bootstrap.servers: localhost:9092
         security.protocol: SASL_PLAINTEXT
         sasl.mechanism: PLAIN
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="galaxy2019";
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="example" password="example";
     format: json
 
 pipeline:
