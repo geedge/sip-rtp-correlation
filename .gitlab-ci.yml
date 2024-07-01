@@ -1,0 +1,38 @@
+image: 192.168.40.153:9080/common/maven:3.8.1-openjdk-11-slim-with-git
+
+variables:
+  MAVEN_CLI_OPTS: "--batch-mode --errors --show-version"
+
+stages:
+  - check
+  - test
+  - build
+
+release-version-check:
+  stage: check
+  script:
+    - mvn $MAVEN_CLI_OPTS enforcer:enforce@release-version-check
+    - |-
+      if `mvn $MAVEN_CLI_OPTS dependency:get@release-deploy-check > /dev/null 2>&1`; then
+        echo "The current version has been deployed."
+        exit 1
+      else
+        echo "The current version has not been deployed."
+      fi
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" && $CI_PIPELINE_SOURCE == "merge_request_event"
+
+test:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS clean test
+  only:
+    - merge_requests
+
+build:
+  stage: build
+  script:
+    - echo "$MAVEN_SETTINGS_XML" > /usr/share/maven/conf/settings.xml
+    - mvn clean site deploy -DskipTests
+  only:
+    - master

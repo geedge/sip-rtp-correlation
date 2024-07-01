@@ -1,0 +1,13 @@
+#banner {
+    height: 108px;
+    background: none;
+}
+
+#bannerLeft img {
+    margin-left: 18px;
+    margin-top: 10px;
+}
+
+div.well {
+    display: none;
+}
