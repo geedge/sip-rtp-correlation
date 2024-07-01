@@ -1348,7 +1348,7 @@ pipeline:
             data-type: INT
     where:
       - on: sip-double-way-records.ok
-        key-by: vsys_id, SORT_ADDRESS( sip_originator_sdp_connect_ip, sip_originator_sdp_media_port, sip_responder_sdp_connect_ip, sip_responder_sdp_media_port )
+        key-by: vsys_id, SORT_ADDRESS( sip_originator_sdp_connect_ip, sip_originator_sdp_media_port, sip_responder_sdp_connect_ip, sip_responder_sdp_media_port ) AS address
         # SIP
         process:
           - SET sip FROM withColumns(recv_time to rtp_originator_dir)
@@ -1434,7 +1434,7 @@ pipeline:
           # TODO USE EVENT
           - SCHEDULING USING PROCESS TIME FOR NOW + 6 * 60 * 1000
       - on: rtp-records
-        key-by: vsys_id, SORT_ADDRESS( client_ip, client_port, server_ip, server_port )
+        key-by: vsys_id, SORT_ADDRESS( client_ip, client_port, server_ip, server_port ) AS address
         process:
           - APPEND rtp FROM withColumns(recv_time to rtp_originator_dir)
           - if: '@sip.isNotNull'
