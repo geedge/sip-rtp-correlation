@@ -7,4 +7,4 @@ SIP RTP Correlation 项目可以用于实时监控和分析 VoIP 通话数据，
 <br/>
 
 
-You can download the latest release from [Job Yml](./jobs/job.yml). And you can changelog from [CHANGELOG.md](./changelogs.html).
+You can download the latest release from [Downloads](./download.html). And you can changelog from [Changelogs](./changelogs.html).
