@@ -2,11 +2,19 @@
 
 ### ${project.version}
 
-- 修复由于 State 过期策略早于 Timer 触发而导致的未关联成功的 RTP 数据未正常输出的问题。
+- 移除对 `log_id`, `recv_time` 字段的强制非空校验, 该字段在后续步骤中处理。
 
 | Easy Stream | UDF Jar                                                      | Job                                                          |
 |-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
 | ${easy.stream.version}         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.sha1) ) |
+
+### 2.0-rc3
+
+- 修复由于 State 过期策略早于 Timer 触发而导致的未关联成功的 RTP 数据未正常输出的问题。
+
+| Easy Stream | UDF Jar                                                      | Job                                                          |
+|-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 1.3-rc1     | [JAR](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc3/sip-rtp-correlation-2.0-rc3.jar) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc3/sip-rtp-correlation-2.0-rc3.jar.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc3/sip-rtp-correlation-2.0-rc3.jar.sha1) ) | [YML](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc3/sip-rtp-correlation-2.0-rc3.tar.gz) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc3/sip-rtp-correlation-2.0-rc3.tar.gz.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc3/sip-rtp-correlation-2.0-rc3.tar.gz.sha1) ) |
 
 ### 2.0-rc2
 
