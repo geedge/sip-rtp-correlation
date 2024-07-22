@@ -11,6 +11,7 @@ stages:
 release-version-check:
   stage: check
   script:
+    - echo "$MAVEN_SETTINGS_XML" > /usr/share/maven/conf/settings.xml
     - mvn $MAVEN_CLI_OPTS enforcer:enforce@release-version-check
     - |-
       if `mvn $MAVEN_CLI_OPTS dependency:get@release-deploy-check > /dev/null 2>&1`; then
@@ -25,6 +26,7 @@ release-version-check:
 test:
   stage: test
   script:
+    - echo "$MAVEN_SETTINGS_XML" > /usr/share/maven/conf/settings.xml
     - mvn $MAVEN_CLI_OPTS clean test
   only:
     - merge_requests
