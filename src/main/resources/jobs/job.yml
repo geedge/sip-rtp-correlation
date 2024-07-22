@@ -21,9 +21,9 @@ source:
     schema:
       ## General
       - name: recv_time
-        data-type: BIGINT NOT NULL
+        data-type: BIGINT
       - name: log_id
-        data-type: BIGINT NOT NULL
+        data-type: BIGINT
       - name: decoded_as
         data-type: STRING NOT NULL
       - name: session_id
@@ -367,9 +367,9 @@ pipeline:
         schema:
           ## General
           - name: recv_time
-            data-type: BIGINT NOT NULL
+            data-type: BIGINT
           - name: log_id
-            data-type: BIGINT NOT NULL
+            data-type: BIGINT
           - name: decoded_as
             data-type: STRING NOT NULL
           - name: session_id
@@ -810,9 +810,9 @@ pipeline:
         schema:
           ## General
           - name: recv_time
-            data-type: BIGINT NOT NULL
+            data-type: BIGINT
           - name: log_id
-            data-type: BIGINT NOT NULL
+            data-type: BIGINT
           - name: decoded_as
             data-type: STRING NOT NULL
           - name: session_id
@@ -1081,9 +1081,9 @@ pipeline:
         schema:
           ## General
           - name: recv_time
-            data-type: BIGINT NOT NULL
+            data-type: BIGINT
           - name: log_id
-            data-type: BIGINT NOT NULL
+            data-type: BIGINT
           - name: decoded_as
             data-type: STRING NOT NULL
           - name: session_id
