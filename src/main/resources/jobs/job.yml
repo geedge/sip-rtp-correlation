@@ -294,7 +294,7 @@ sink:
     type: kafka
     on: errors-records
     option:
-      topic: VOIP-CONVERSATTON-RECORD
+      topic: VOIP-CONVERSATION-RECORD
       properties:
         bootstrap.servers: localhost:9092
         security.protocol: SASL_PLAINTEXT
@@ -306,7 +306,7 @@ sink:
     on: voip-fusion.ok
     type: kafka
     option:
-      topic: VOIP-CONVERSATTON-RECORD
+      topic: VOIP-CONVERSATION-RECORD
       properties:
         bootstrap.servers: localhost:9092
         security.protocol: SASL_PLAINTEXT
@@ -318,7 +318,7 @@ sink:
     on: cannot-fusion-records
     type: kafka
     option:
-      topic: VOIP-CONVERSATTON-RECORD
+      topic: VOIP-CONVERSATION-RECORD
       properties:
         bootstrap.servers: localhost:9092
         security.protocol: SASL_PLAINTEXT
@@ -363,7 +363,7 @@ pipeline:
     cache:
       - name: v1
         type: VALUE
-        ttl: 1 minute
+        ttl: 2 minute
         schema:
           ## General
           - name: recv_time
@@ -806,7 +806,7 @@ pipeline:
     cache:
       - name: sip
         type: VALUE
-        ttl: 6 minute
+        ttl: 7 minute
         schema:
           ## General
           - name: recv_time
@@ -1077,7 +1077,7 @@ pipeline:
             data-type: INT
       - name: rtp
         type: LIST
-        ttl: 6 minute
+        ttl: 7 minute
         schema:
           ## General
           - name: recv_time
