@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 public class ApplicationTest {
 
     static {
-//        System.setProperty("easy.execute.mode", "validate");
+        System.setProperty("easy.execute.mode", "validate");
         System.setProperty("flink.rest.bind-port", "8081");
 //        System.setProperty("flink.rest.flamegraph.enabled", "true");
         System.setProperty("flink.heartbeat.timeout", "1800000");

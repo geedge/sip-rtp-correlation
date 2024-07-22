@@ -28,17 +28,17 @@
     <distributionManagement>
         <repository>
             <id>platform-releases</id>
-            <url>http://192.168.40.153:8099/content/repositories/platform-release</url>
+            <url>http://192.168.40.153:8081/content/repositories/platform-release</url>
             <uniqueVersion>true</uniqueVersion>
         </repository>
         <snapshotRepository>
             <id>platform-snapshots</id>
-            <url>http://192.168.40.153:8099/content/repositories/platform-snapshot</url>
+            <url>http://192.168.40.153:8081/content/repositories/platform-snapshot</url>
         </snapshotRepository>
         <site>
             <id>platform-site</id>
             <url>
-                dav:http://192.168.40.153:8099/content/sites/platform-site/platform/application/sip-rtp-correlate-${project.version}
+                dav:http://192.168.40.153:8081/content/sites/platform-site/platform/application/sip-rtp-correlate-${project.version}
             </url>
         </site>
     </distributionManagement>
@@ -46,11 +46,11 @@
     <repositories>
         <repository>
             <id>central</id>
-            <url>http://192.168.40.153:8099/content/groups/public</url>
+            <url>http://192.168.40.153:8081/repository/public/</url>
         </repository>
         <repository>
             <id>snapshots</id>
-            <url>http://192.168.40.153:8099/content/groups/public</url>
+            <url>http://192.168.40.153:8081/repository/public/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
