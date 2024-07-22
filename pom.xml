@@ -43,20 +43,6 @@
         </site>
     </distributionManagement>
 
-    <repositories>
-        <repository>
-            <id>central</id>
-            <url>http://192.168.40.153:8081/repository/public/</url>
-        </repository>
-        <repository>
-            <id>snapshots</id>
-            <url>http://192.168.40.153:8081/repository/public/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
