@@ -2,11 +2,19 @@
 
 ### ${project.version}
 
-- 修复 VoIP 字段错误，使用 `decoded_as` 表示 VoIP 日志。
+- VoIP Record 增加字段: SIP， RTP `protocol` 相关字段。
 
 | Easy Stream | UDF Jar                                                      | Job                                                          |
 |-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
 | ${easy.stream.version}         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.sha1) ) |
+
+### 2.0-rc5
+
+- 修复 VoIP 字段错误，使用 `decoded_as` 表示 VoIP 日志。
+
+| Easy Stream | UDF Jar                                                      | Job                                                          |
+|-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 1.3-rc1     | [JAR](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc5/sip-rtp-correlation-2.0-rc5.jar) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc5/sip-rtp-correlation-2.0-rc5.jar.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc5/sip-rtp-correlation-2.0-rc5.jar.sha1) ) | [YML](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc5/sip-rtp-correlation-2.0-rc5.tar.gz) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc5/sip-rtp-correlation-2.0-rc5.tar.gz.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc5/sip-rtp-correlation-2.0-rc5.tar.gz.sha1) ) |
 
 ### 2.0-rc4
 
