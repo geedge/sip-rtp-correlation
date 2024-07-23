@@ -1358,7 +1358,7 @@ pipeline:
                 FLAT OUTPUT ok FOR i IN rtp FROM 
                         @i.$recv_time AS recv_time,
                         @i.$log_id AS log_id,
-                        'VoIP' AS decode_as,
+                        'VoIP' AS decoded_as,
                         @i.$session_id AS session_id,
                         @i.$start_timestamp_ms AS start_timestamp_ms,
                         @i.$end_timestamp_ms AS end_timestamp_ms,
@@ -1443,7 +1443,7 @@ pipeline:
                 FLAT OUTPUT ok FOR i IN rtp FROM
                                 @i.$recv_time AS recv_time,
                                 @i.$log_id AS log_id,
-                                'VoIP' AS decode_as,
+                                'VoIP' AS decoded_as,
                                 @i.$session_id AS session_id,
                                 @i.$start_timestamp_ms AS start_timestamp_ms,
                                 @i.$end_timestamp_ms AS end_timestamp_ms,
