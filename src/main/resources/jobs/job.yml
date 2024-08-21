@@ -278,6 +278,8 @@ source:
         data-type: INT
       - name: sip_bye
         data-type: STRING
+      - name: sip_bye_reason
+        data-type: STRING
       ## RTP
       - name: rtp_payload_type_c2s
         data-type: INT
@@ -623,6 +625,8 @@ pipeline:
             data-type: INT
           - name: sip_bye
             data-type: STRING
+          - name: sip_bye_reason
+            data-type: STRING
           ## RTP
           - name: rtp_payload_type_c2s
             data-type: INT
@@ -654,6 +658,7 @@ pipeline:
                       FIND_NOT_BLANK(@v1.$sip_responder_sdp_content, sip_responder_sdp_content) AS sip_responder_sdp_content,
                       @v1.$sip_duration_s + sip_duration_s AS sip_duration_s,
                       FIND_NOT_BLANK(@v1.$sip_bye, sip_bye) AS sip_bye,
+                      FIND_NOT_BLANK(@v1.$sip_bye_reason, sip_bye_reason) AS sip_bye_reason,
                       rtp_payload_type_c2s,
                       rtp_payload_type_s2c,
                       rtp_pcap_path,
@@ -796,6 +801,7 @@ pipeline:
                           @v1.$sip_responder_sdp_content AS sip_responder_sdp_content,
                           @v1.$sip_duration_s AS sip_duration_s,
                           @v1.$sip_bye AS sip_bye,
+                          @v1.$sip_bye_reason AS sip_bye_reason,
                           @v1.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
                           @v1.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
                           @v1.$rtp_pcap_path AS rtp_pcap_path,
@@ -1065,6 +1071,8 @@ pipeline:
           - name: sip_duration_s
             data-type: INT
           - name: sip_bye
+            data-type: STRING
+          - name: sip_bye_reason
             data-type: STRING
           ## RTP
           - name: rtp_payload_type_c2s
@@ -1337,6 +1345,8 @@ pipeline:
             data-type: INT
           - name: sip_bye
             data-type: STRING
+          - name: sip_bye_reason
+            data-type: STRING
           ## RTP
           - name: rtp_payload_type_c2s
             data-type: INT
@@ -1411,7 +1421,7 @@ pipeline:
                         @i.$sent_bytes AS sent_bytes,
                         @i.$received_bytes AS received_bytes,
                         
-                        withColumns(sip_call_id to sip_bye), 
+                        withColumns(sip_call_id to sip_bye_reason), 
                       
                         @i.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
                         @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
@@ -1498,6 +1508,7 @@ pipeline:
                                 @sip.$sip_responder_sdp_content AS sip_responder_sdp_content,
                                 @sip.$sip_duration_s AS sip_duration_s,
                                 @sip.$sip_bye AS sip_bye,
+                                @sip.$sip_bye_reason AS sip_bye_reason,
                 
                                 @i.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
                                 @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
@@ -1632,6 +1643,7 @@ pipeline:
                             @i.$sip_responder_sdp_content AS sip_responder_sdp_content,
                             @i.$sip_duration_s AS sip_duration_s,
                             @i.$sip_bye AS sip_bye,
+                            @i.$sip_bye_reason AS sip_bye_reason,
                             @i.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
                             @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
                             @i.$rtp_pcap_path AS rtp_pcap_path,
@@ -1764,6 +1776,7 @@ pipeline:
                         @sip.$sip_responder_sdp_content AS sip_responder_sdp_content,
                         @sip.$sip_duration_s AS sip_duration_s,
                         @sip.$sip_bye AS sip_bye,
+                        @sip.$sip_bye_reason AS sip_bye_reason,
                         @sip.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
                         @sip.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
                         @sip.$rtp_pcap_path AS rtp_pcap_path,
