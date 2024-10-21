@@ -2,6 +2,7 @@ package com.geedgenetworks.flink.easy.application.voip.udf;
 
 import com.google.common.collect.Lists;
 import com.zdjizhi.utils.IPUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
@@ -17,6 +18,9 @@ public class SortAddress extends ScalarFunction {
     public static String of(
             Tuple2<String, Integer> a1, Tuple2<String, Integer> a2) {
         var list = Lists.newArrayList(a1, a2);
+        if (a1.f1 == null || a2.f1 == null || StringUtils.isAnyEmpty(a1.f0, a2.f0)) {
+            return "";
+        }
         list.sort((a, b) -> {
             if (a.f1.equals(b.f1)) {
                 return Long.compare(
