@@ -9,7 +9,7 @@ public class StreamDirSet extends ScalarFunction {
         if (flags == null) {
             return 8192 + 16384L;
         }
-        Long r = null;
+        long r = 0;
         if ((flags & 8192) == 0) {
             r += 8192;
         }
