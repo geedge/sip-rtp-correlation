@@ -18,9 +18,4 @@ public class StreamDir extends ScalarFunction {
         }
         return v;
     }
-
-    public static void main(String[] args) {
-        System.out.println(8192L + 16384L);
-        System.out.println(new StreamDir().eval(8192L + 16384L));
-    }
 }

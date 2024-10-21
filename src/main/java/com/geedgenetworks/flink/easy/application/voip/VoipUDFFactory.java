@@ -20,6 +20,7 @@ public class VoipUDFFactory implements UDFFactory {
                 put("HAS_EXTERNAL_IP_ADDRESS", new HasExternalIpAddress());
 
                 put("STREAM_DIR", new StreamDir());
+                put("STREAM_DIR_SET", new StreamDirSet());
                 put("FIND_NOT_BLANK", new FindNotBlank());
                 put("SORT_ADDRESS", new SortAddress());
 
