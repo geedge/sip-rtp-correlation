@@ -22,6 +22,7 @@ public class VoipUDFFactory implements UDFFactory {
                 put("STREAM_DIR", new StreamDir());
                 put("STREAM_DIR_SET", new StreamDirSet());
                 put("FIND_NOT_BLANK", new FindNotBlank());
+                put("DISTINCT_CONCAT", new DistinctConcat());
                 put("SORT_ADDRESS", new SortAddress());
 
                 put("SNOWFLAKE_ID", new SnowflakeID());

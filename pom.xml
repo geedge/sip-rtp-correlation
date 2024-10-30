@@ -62,8 +62,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.zdjizhi</groupId>
-            <artifactId>galaxy</artifactId>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
         </dependency>
         <dependency>
             <groupId>xyz.downgoon</groupId>
@@ -239,23 +239,9 @@
 
             <!--  Common  -->
             <dependency>
-                <groupId>com.zdjizhi</groupId>
-                <artifactId>galaxy</artifactId>
-                <version>1.1.3</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.commons</groupId>
-                        <artifactId>commons-lang3</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>5.8.32</version>
             </dependency>
 
             <!-- Easy Stream-->
@@ -588,7 +574,8 @@
                                 <groupId>${project.groupId}</groupId>
                                 <artifactId>easy-stream-common</artifactId>
                                 <version>${project.version}</version>
-                                <remoteRepositories>${project.distributionManagement.repository.url}</remoteRepositories>
+                                <remoteRepositories>${project.distributionManagement.repository.url}
+                                </remoteRepositories>
                             </configuration>
                         </execution>
                     </executions>

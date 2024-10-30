@@ -16,7 +16,7 @@ source:
         group.id: sip-rtp-correlation
         security.protocol: SASL_PLAINTEXT
         sasl.mechanism: PLAIN
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="example" password="example";
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="EXAMPLE-KAFKA-USERNAME" password="EXAMPLE-KAFKA-PASSWORD";
     format: json
     schema:
       ## General
@@ -301,7 +301,7 @@ sink:
         bootstrap.servers: localhost:9092
         security.protocol: SASL_PLAINTEXT
         sasl.mechanism: PLAIN
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="example" password="example";
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="EXAMPLE-KAFKA-USERNAME" password="EXAMPLE-KAFKA-PASSWORD";
     format: json
   # 关联成功的 VOIP
   - name: only-voip-records
@@ -313,7 +313,7 @@ sink:
         bootstrap.servers: localhost:9092
         security.protocol: SASL_PLAINTEXT
         sasl.mechanism: PLAIN
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="example" password="example";
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="EXAMPLE-KAFKA-USERNAME" password="EXAMPLE-KAFKA-PASSWORD";
     format: json
   # 没有关联成功的 SIP 和 RTP
   - name: fusion-fail-records
@@ -325,7 +325,7 @@ sink:
         bootstrap.servers: localhost:9092
         security.protocol: SASL_PLAINTEXT
         sasl.mechanism: PLAIN
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="example" password="example";
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="EXAMPLE-KAFKA-USERNAME" password="EXAMPLE-KAFKA-PASSWORD";
     format: json
 
 pipeline:
@@ -345,7 +345,7 @@ pipeline:
       - name: error4-records
         where: decoded_as == 'SIP' && STREAM_DIR(flags) == 3 && ( NOT( IS_IP_ADDRESS(sip_originator_sdp_connect_ip) ) || NOT( IS_IP_ADDRESS(sip_responder_sdp_connect_ip) ) )
 
-      ### Notes: If internal IP address correlate is needed, please uncomment the following two items
+      ### Notes: If internal IP address correlate is needed, please comment the following two items
   #      # Invalid: SIP one-way stream and internal network address
   #      - name: internal-error1-records
   #        where: decoded_as == 'SIP' && NOT(HAS_EXTERNAL_IP_ADDRESS(sip_originator_sdp_connect_ip, sip_responder_sdp_connect_ip))
@@ -643,9 +643,17 @@ pipeline:
           - if: STREAM_DIR(flags) != 3 && @v1.isNotNull && STREAM_DIR(@v1.$flags) != STREAM_DIR(flags)
             then:
               - |-
-                OUTPUT ok FROM withColumns(recv_time to t_vsys_id), 
+                OUTPUT ok FROM withColumns(recv_time to device_tag), 
+                      DISTINCT_CONCAT(@v1.$data_center, data_center) AS data_center,
+                      DISTINCT_CONCAT(@v1.$device_group, device_group) AS device_group,
+                      withColumns(sled_ip to t_vsys_id),
                       STREAM_DIR_SET(flags) AS flags,
-                      withColumns(flags_identify_info to sip_call_id),
+                      withColumns(flags_identify_info to decoded_path),
+                      @v1.$sent_pkts + sent_pkts AS sent_pkts, 
+                      @v1.$received_pkts + received_pkts AS received_pkts, 
+                      @v1.$sent_bytes + sent_bytes AS sent_bytes, 
+                      @v1.$received_bytes + received_bytes AS received_bytes ,
+                      withColumns(tcp_c2s_ip_fragments to sip_call_id),
                       FIND_NOT_BLANK(@v1.$sip_originator_description, sip_originator_description) AS sip_originator_description,
                       FIND_NOT_BLANK(@v1.$sip_responder_description, sip_responder_description) AS sip_responder_description,
                       FIND_NOT_BLANK(@v1.$sip_user_agent, sip_user_agent) AS sip_user_agent,
@@ -674,7 +682,7 @@ pipeline:
             then:
               - |-
                 OUTPUT ok FROM withColumns(recv_time to rtp_originator_dir)
-          - SCHEDULING USING EVENT TIME FOR NOW + 60 * 1000
+          - SCHEDULING USING PROCESS TIME FOR NOW + 60 * 1000
     schedule:
       - if: '@v1.isNotNull'
         then:
@@ -1383,14 +1391,14 @@ pipeline:
                         @i.$out_link_id AS out_link_id,
                         @i.$in_link_id AS in_link_id,
                         @i.$device_tag AS device_tag,
-                        @i.$data_center AS data_center,
-                        @i.$device_group AS device_group,
+                        DISTINCT_CONCAT(@i.$data_center, data_center) AS data_center,
+                        DISTINCT_CONCAT(@i.$device_group, device_group) AS device_group,
                         @i.$sled_ip AS sled_ip,
                         @i.$address_type AS address_type,
                         @i.$direction AS direction,
                         @i.$vsys_id AS vsys_id,
                         @i.$t_vsys_id AS t_vsys_id,
-                        @i.$flags AS flags,
+                        flags AS flags,
                         @i.$flags_identify_info AS flags_identify_info,
                         
                         @i.$c2s_ttl AS c2s_ttl,
@@ -1418,10 +1426,10 @@ pipeline:
                         
                         @i.$ip_protocol AS ip_protocol,
                         
-                        @i.$sent_pkts AS sent_pkts,
-                        @i.$received_pkts AS received_pkts,
-                        @i.$sent_bytes AS sent_bytes,
-                        @i.$received_bytes AS received_bytes,
+                        @i.$sent_pkts + sent_pkts AS sent_pkts,
+                        @i.$received_pkts + received_pkts AS received_pkts,
+                        @i.$sent_bytes + sent_bytes AS sent_bytes,
+                        @i.$received_bytes + received_bytes AS received_bytes,
                         
                         withColumns(sip_call_id to sip_bye_reason), 
                       
@@ -1462,8 +1470,8 @@ pipeline:
                                 @i.$direction AS direction,
                                 @i.$vsys_id AS vsys_id,
                                 @i.$t_vsys_id AS t_vsys_id,
-                                @i.$flags AS flags,
-                                @i.$flags_identify_info AS flags_identify_info,
+                                @sip.$flags AS flags,
+                                @sip.$flags_identify_info AS flags_identify_info,
                                 
                                 @i.$c2s_ttl AS c2s_ttl,
                                 @i.$s2c_ttl AS s2c_ttl,
@@ -1490,10 +1498,10 @@ pipeline:
                                 
                                 @i.$ip_protocol AS ip_protocol,
                                 
-                                @i.$sent_pkts AS sent_pkts,
-                                @i.$received_pkts AS received_pkts,
-                                @i.$sent_bytes AS sent_bytes,
-                                @i.$received_bytes AS received_bytes,
+                                @i.$sent_pkts + sent_pkts AS sent_pkts,
+                                @i.$received_pkts + received_pkts AS received_pkts,
+                                @i.$sent_bytes + sent_bytes AS sent_bytes,
+                                @i.$received_bytes + received_bytes AS received_bytes,
                                 
                                 @sip.$sip_call_id AS sip_call_id,
                                 @sip.$sip_originator_description AS sip_originator_description,
