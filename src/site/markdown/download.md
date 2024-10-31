@@ -2,11 +2,30 @@
 
 ### ${project.version}
 
-- VoIP Record 增加字段: SIP `sip_bye_reason` 相关字段。
+- 修复 sip 双向关联模块的数据丢失问题。
+- [GAL-684](https://jira.geedge.net/browse/GAL-684) 调整融合后的字段映射，增加更加详细的监控指标。
 
 | Easy Stream | UDF Jar                                                      | Job                                                          |
 |-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
 | ${easy.stream.version}         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.sha1) ) |
+
+### 2.0-rc8
+
+- 修复 Extract Key 错误，由于 IpAddress 类型数据校验导致的空指针异常。
+
+| Easy Stream | UDF Jar                                                      | Job                                                          |
+|-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 1.3-rc1         | [JAR](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc8/sip-rtp-correlation-2.0-rc8.jar) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc8/sip-rtp-correlation-2.0-rc8.jar.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc8/sip-rtp-correlation-2.0-rc8.jar.sha1) ) | [YML](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc8/sip-rtp-correlation-2.0-rc8.tar.gz) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc8/sip-rtp-correlation-2.0-rc8.tar.gz.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc8/sip-rtp-correlation-2.0-rc8.tar.gz.sha1) ) |
+
+
+### 2.0-rc7
+
+- VoIP Record 增加字段: SIP `sip_bye_reason` 相关字段。
+
+| Easy Stream | UDF Jar                                                      | Job                                                          |
+|-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 1.3-rc1         | [JAR](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc7/sip-rtp-correlation-2.0-rc7.jar) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc7/sip-rtp-correlation-2.0-rc7.jar.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc7/sip-rtp-correlation-2.0-rc7.jar.sha1) ) | [YML](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc7/sip-rtp-correlation-2.0-rc7.tar.gz) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc7/sip-rtp-correlation-2.0-rc7.tar.gz.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc7/sip-rtp-correlation-2.0-rc7.tar.gz.sha1) ) |
+
 
 ### 2.0-rc6
 

@@ -1,13 +1,14 @@
 package com.geedgenetworks.flink.easy.application.voip.udf;
 
-import com.google.common.collect.Lists;
-import com.zdjizhi.utils.IPUtil;
+import cn.hutool.core.net.NetUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.table.annotation.DataTypeHint;
-import org.apache.flink.table.functions.ScalarFunction;
 
-public class SortAddress extends ScalarFunction {
+import java.util.ArrayList;
+import java.util.List;
+
+public class SortAddress extends IpAddressScalarFunction {
 
     public @DataTypeHint("STRING")
     String eval(
@@ -17,19 +18,31 @@ public class SortAddress extends ScalarFunction {
 
     public static String of(
             Tuple2<String, Integer> a1, Tuple2<String, Integer> a2) {
-        var list = Lists.newArrayList(a1, a2);
-        if (a1.f1 == null || a2.f1 == null || StringUtils.isAnyEmpty(a1.f0, a2.f0)) {
-            return "";
+        var list = new ArrayList<>(List.of(a1, a2));
+        if (a1.f1 == null || a2.f1 == null || StringUtils.isAnyEmpty(a1.f0, a2.f0)
+                || !isIpAddress(a1.f0) || !isIpAddress(a2.f0)) {
+            return a1.f0 + ":" + a1.f1 + "," + a2.f0 + ":" + a2.f1;
         }
         list.sort((a, b) -> {
             if (a.f1.equals(b.f1)) {
-                return Long.compare(
-                        IPUtil.getIpDesimal(a.f0), IPUtil.getIpDesimal(b.f0));
+                return compareAddress(a.f0, b.f0);
             } else {
                 return a.f1.compareTo(b.f1);
             }
         });
         return String.format("%s:%s,%s:%s",
                 list.get(0).f0, list.get(0).f1, list.get(1).f0, list.get(1).f1);
+    }
+
+    private static int compareAddress(String ip1, String ip2) {
+        try {
+            var v1 = isIpv4(ip1) ? NetUtil.ipv4ToLong(ip1) :
+                    NetUtil.ipv6ToBigInteger(ip1).longValue();
+            var v2 = isIpv4(ip2) ? NetUtil.ipv4ToLong(ip2) :
+                    NetUtil.ipv6ToBigInteger(ip2).longValue();
+            return Long.compare(v1, v2);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }
