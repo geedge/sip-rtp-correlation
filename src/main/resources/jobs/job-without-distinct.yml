@@ -1,0 +1,1944 @@
+job:
+  name: correlation_sip_rtp_session
+  parallelism: 1
+  active-pipeline:
+    - only-voip-records
+    - fusion-fail-records
+    - all-errors-records
+
+source:
+  - name: session-records
+    type: kafka
+    option:
+      topic: VOIP-RECORD
+      properties:
+        bootstrap.servers: localhost:9092
+        group.id: sip-rtp-correlation
+        security.protocol: SASL_PLAINTEXT
+        sasl.mechanism: PLAIN
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="EXAMPLE-KAFKA-USERNAME" password="EXAMPLE-KAFKA-PASSWORD";
+    format: json
+    schema:
+      ## General
+      - name: recv_time
+        data-type: BIGINT
+      - name: log_id
+        data-type: BIGINT
+      - name: decoded_as
+        data-type: STRING NOT NULL
+      - name: session_id
+        data-type: BIGINT NOT NULL
+      - name: start_timestamp_ms
+        data-type: BIGINT NOT NULL
+      # row-time:
+      - name: start_timestamp
+        for: TO_TIMESTAMP_LTZ(start_timestamp_ms, 3)
+        watermark: start_timestamp - INTERVAL '5' MINUTE
+      - name: end_timestamp_ms
+        data-type: BIGINT
+      - name: duration_ms
+        data-type: INT
+      - name: tcp_handshake_latency_ms
+        data-type: INT
+      - name: ingestion_time
+        data-type: BIGINT
+      - name: processing_time
+        data-type: BIGINT
+      - name: insert_time
+        data-type: BIGINT
+      - name: device_id
+        data-type: STRING
+      - name: out_link_id
+        data-type: INT
+      - name: in_link_id
+        data-type: INT
+      - name: device_tag
+        data-type: STRING
+      - name: data_center
+        data-type: STRING
+      - name: device_group
+        data-type: STRING
+      - name: sled_ip
+        data-type: STRING
+      - name: address_type
+        data-type: INT
+      - name: direction
+        data-type: STRING
+      - name: vsys_id
+        data-type: INT
+      - name: t_vsys_id
+        data-type: INT
+      - name: flags
+        data-type: BIGINT
+      - name: flags_identify_info
+        data-type: STRING
+      - name: c2s_ttl
+        data-type: INT
+      - name: s2c_ttl
+        data-type: INT
+      ## Treatment
+      - name: security_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: security_action
+        data-type: STRING
+      - name: monitor_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: shaping_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: proxy_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: statistics_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: sc_rule_list
+        data-type: ARRAY<BIGINT>
+      - name: sc_rsp_raw
+        data-type: ARRAY<BIGINT>
+      - name: sc_rsp_decrypted
+        data-type: ARRAY<BIGINT>
+      - name: proxy_action
+        data-type: STRING
+      - name: proxy_pinning_status
+        data-type: INT
+      - name: proxy_intercept_status
+        data-type: INT
+      - name: proxy_passthrough_reason
+        data-type: STRING
+      - name: proxy_client_side_latency_ms
+        data-type: INT
+      - name: proxy_server_side_latency_ms
+        data-type: INT
+      - name: proxy_client_side_version
+        data-type: STRING
+      - name: proxy_server_side_version
+        data-type: STRING
+      - name: proxy_cert_verify
+        data-type: INT
+      - name: proxy_intercept_error
+        data-type: STRING
+      - name: monitor_mirrored_pkts
+        data-type: INT
+      - name: monitor_mirrored_bytes
+        data-type: INT
+      ## Source
+      - name: client_ip
+        data-type: STRING
+      - name: client_port
+        data-type: INT
+      - name: client_os_desc
+        data-type: STRING
+      - name: client_geolocation
+        data-type: STRING
+      - name: client_country
+        data-type: STRING
+      - name: client_super_administrative_area
+        data-type: STRING
+      - name: client_administrative_area
+        data-type: STRING
+      - name: client_sub_administrative_area
+        data-type: STRING
+      - name: client_asn
+        data-type: BIGINT
+      - name: subscriber_id
+        data-type: STRING
+      - name: imei
+        data-type: STRING
+      - name: imsi
+        data-type: STRING
+      - name: phone_number
+        data-type: STRING
+      - name: apn
+        data-type: STRING
+      ## Destination
+      - name: server_ip
+        data-type: STRING
+      - name: server_port
+        data-type: INT
+      - name: server_os_desc
+        data-type: STRING
+      - name: server_geolocation
+        data-type: STRING
+      - name: server_country
+        data-type: STRING
+      - name: server_super_administrative_area
+        data-type: STRING
+      - name: server_administrative_area
+        data-type: STRING
+      - name: server_sub_administrative_area
+        data-type: STRING
+      - name: server_asn
+        data-type: BIGINT
+      - name: server_fqdn
+        data-type: STRING
+      - name: server_domain
+        data-type: STRING
+      - name: fqdn_category_list
+        data-type: ARRAY<INT>
+      ## Application
+      - name: app_transition
+        data-type: STRING
+      - name: app
+        data-type: STRING
+      - name: app_category
+        data-type: STRING
+      - name: app_debug_info
+        data-type: STRING
+      - name: app_content
+        data-type: STRING
+      - name: app_extra_info
+        data-type: STRING
+      ## Protocol
+      - name: ip_protocol
+        data-type: STRING
+      - name: decoded_path
+        data-type: STRING
+      ## Transmission
+      - name: sent_pkts
+        data-type: BIGINT
+      - name: received_pkts
+        data-type: BIGINT
+      - name: sent_bytes
+        data-type: BIGINT
+      - name: received_bytes
+        data-type: BIGINT
+      - name: tcp_c2s_ip_fragments
+        data-type: BIGINT
+      - name: tcp_s2c_ip_fragments
+        data-type: BIGINT
+      - name: tcp_c2s_lost_bytes
+        data-type: BIGINT
+      - name: tcp_s2c_lost_bytes
+        data-type: BIGINT
+      - name: tcp_c2s_o3_pkts
+        data-type: BIGINT
+      - name: tcp_s2c_o3_pkts
+        data-type: BIGINT
+      - name: tcp_c2s_rtx_pkts
+        data-type: BIGINT
+      - name: tcp_s2c_rtx_pkts
+        data-type: BIGINT
+      - name: tcp_c2s_rtx_bytes
+        data-type: BIGINT
+      - name: tcp_s2c_rtx_bytes
+        data-type: BIGINT
+      - name: tcp_rtt_ms
+        data-type: INT
+      - name: tcp_client_isn
+        data-type: BIGINT
+      - name: tcp_server_isn
+        data-type: BIGINT
+      ## Other
+      - name: packet_capture_file
+        data-type: STRING
+      - name: in_src_mac
+        data-type: STRING
+      - name: out_src_mac
+        data-type: STRING
+      - name: in_dest_mac
+        data-type: STRING
+      - name: out_dest_mac
+        data-type: STRING
+      - name: encapsulation
+        data-type: STRING
+      - name: dup_traffic_flag
+        data-type: INT
+      - name: tunnel_id_list
+        data-type: ARRAY<BIGINT>
+      - name: tunnel_endpoint_a_desc
+        data-type: STRING
+      - name: tunnel_endpoint_b_desc
+        data-type: STRING
+      ## SIP
+      - name: sip_call_id
+        data-type: STRING
+      - name: sip_originator_description
+        data-type: STRING
+      - name: sip_responder_description
+        data-type: STRING
+      - name: sip_user_agent
+        data-type: STRING
+      - name: sip_server
+        data-type: STRING
+      - name: sip_originator_sdp_connect_ip
+        data-type: STRING
+      - name: sip_originator_sdp_media_port
+        data-type: INT
+      - name: sip_originator_sdp_media_type
+        data-type: STRING
+      - name: sip_originator_sdp_content
+        data-type: STRING
+      - name: sip_responder_sdp_connect_ip
+        data-type: STRING
+      - name: sip_responder_sdp_media_port
+        data-type: INT
+      - name: sip_responder_sdp_media_type
+        data-type: STRING
+      - name: sip_responder_sdp_content
+        data-type: STRING
+      - name: sip_duration_s
+        data-type: INT
+      - name: sip_bye
+        data-type: STRING
+      - name: sip_bye_reason
+        data-type: STRING
+      ## RTP
+      - name: rtp_payload_type_c2s
+        data-type: INT
+      - name: rtp_payload_type_s2c
+        data-type: INT
+      - name: rtp_pcap_path
+        data-type: STRING
+      - name: rtp_originator_dir
+        data-type: INT
+
+sink:
+  # 错误的 SIP 和 RTP
+  - name: all-errors-records
+    type: kafka
+    on: errors-records
+    option:
+      topic: VOIP-CONVERSATION-RECORD
+      properties:
+        bootstrap.servers: localhost:9092
+        security.protocol: SASL_PLAINTEXT
+        sasl.mechanism: PLAIN
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="EXAMPLE-KAFKA-USERNAME" password="EXAMPLE-KAFKA-PASSWORD";
+    format: json
+  # 关联成功的 VOIP
+  - name: only-voip-records
+    on: voip-fusion.ok
+    type: kafka
+    option:
+      topic: VOIP-CONVERSATION-RECORD
+      properties:
+        bootstrap.servers: localhost:9092
+        security.protocol: SASL_PLAINTEXT
+        sasl.mechanism: PLAIN
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="EXAMPLE-KAFKA-USERNAME" password="EXAMPLE-KAFKA-PASSWORD";
+    format: json
+  # 没有关联成功的 SIP 和 RTP
+  - name: fusion-fail-records
+    on: cannot-fusion-records
+    type: kafka
+    option:
+      topic: VOIP-CONVERSATION-RECORD
+      properties:
+        bootstrap.servers: localhost:9092
+        security.protocol: SASL_PLAINTEXT
+        sasl.mechanism: PLAIN
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="EXAMPLE-KAFKA-USERNAME" password="EXAMPLE-KAFKA-PASSWORD";
+    format: json
+
+pipeline:
+  - name: split-for-valid
+    category: SPLIT
+    on: session-records
+    splits:
+      # Invalid ip or port
+      - name: error1-records
+        where: NOT(IS_IP_ADDRESS(client_ip)) || NOT(IS_IP_ADDRESS(server_ip)) || client_port.isNull || client_port <= 0 || server_port.isNull || server_port <= 0
+      # Invalid stream dir
+      - name: error2-records
+        where: decoded_as == 'SIP' &&STREAM_DIR(flags) != 1 && STREAM_DIR(flags) != 2 && STREAM_DIR(flags) != 3
+      # Invalid: SIP one-way stream and has invalid network address
+      - name: error3-records
+        where: decoded_as == 'SIP' && ( NOT(HAS_IP_ADDRESS(sip_originator_sdp_connect_ip, sip_responder_sdp_connect_ip)) || sip_originator_sdp_media_port.isNull || sip_originator_sdp_media_port <= 0 || sip_responder_sdp_media_port.isNull && sip_responder_sdp_media_port <= 0 )
+      - name: error4-records
+        where: decoded_as == 'SIP' && STREAM_DIR(flags) == 3 && ( NOT( IS_IP_ADDRESS(sip_originator_sdp_connect_ip) ) || NOT( IS_IP_ADDRESS(sip_responder_sdp_connect_ip) ) )
+
+      ### Notes: If internal IP address correlate is needed, please comment the following two items
+  #      # Invalid: SIP one-way stream and internal network address
+  #      - name: internal-error1-records
+  #        where: decoded_as == 'SIP' && NOT(HAS_EXTERNAL_IP_ADDRESS(sip_originator_sdp_connect_ip, sip_responder_sdp_connect_ip))
+  #      # Invalid: SIP double-way stream and internal network address
+  #      - name: internal-error2-records
+  #        where: decoded_as == 'SIP' && STREAM_DIR(flags) == 3 && ( NOT( IS_EXTERNAL_IP_ADDRESS(sip_originator_sdp_connect_ip) ) || NOT( IS_EXTERNAL_IP_ADDRESS(sip_responder_sdp_connect_ip) ) )
+  - name: split-by-protocol
+    category: SPLIT
+    on: split-for-valid
+    splits:
+      - name: rtp-records
+        where: decoded_as == 'RTP'
+      - name: sip-records
+        where: decoded_as == 'SIP'
+  - name: sip-double-way-records
+    category: CORRELATE
+    cache:
+      - name: v1
+        type: VALUE
+        ttl: 2 minute
+        schema:
+          ## General
+          - name: recv_time
+            data-type: BIGINT
+          - name: log_id
+            data-type: BIGINT
+          - name: decoded_as
+            data-type: STRING NOT NULL
+          - name: session_id
+            data-type: BIGINT NOT NULL
+          - name: start_timestamp_ms
+            data-type: BIGINT NOT NULL
+          # row-time:
+          - name: start_timestamp
+            data-type: TIMESTAMP_LTZ(3)
+          - name: end_timestamp_ms
+            data-type: BIGINT
+          - name: duration_ms
+            data-type: INT
+          - name: tcp_handshake_latency_ms
+            data-type: INT
+          - name: ingestion_time
+            data-type: BIGINT
+          - name: processing_time
+            data-type: BIGINT
+          - name: insert_time
+            data-type: BIGINT
+          - name: device_id
+            data-type: STRING
+          - name: out_link_id
+            data-type: INT
+          - name: in_link_id
+            data-type: INT
+          - name: device_tag
+            data-type: STRING
+          - name: data_center
+            data-type: STRING
+          - name: device_group
+            data-type: STRING
+          - name: sled_ip
+            data-type: STRING
+          - name: address_type
+            data-type: INT
+          - name: direction
+            data-type: STRING
+          - name: vsys_id
+            data-type: INT
+          - name: t_vsys_id
+            data-type: INT
+          - name: flags
+            data-type: BIGINT
+          - name: flags_identify_info
+            data-type: STRING
+          - name: c2s_ttl
+            data-type: INT
+          - name: s2c_ttl
+            data-type: INT
+          ## Treatment
+          - name: security_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: security_action
+            data-type: STRING
+          - name: monitor_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: shaping_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: proxy_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: statistics_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: sc_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: sc_rsp_raw
+            data-type: ARRAY<BIGINT>
+          - name: sc_rsp_decrypted
+            data-type: ARRAY<BIGINT>
+          - name: proxy_action
+            data-type: STRING
+          - name: proxy_pinning_status
+            data-type: INT
+          - name: proxy_intercept_status
+            data-type: INT
+          - name: proxy_passthrough_reason
+            data-type: STRING
+          - name: proxy_client_side_latency_ms
+            data-type: INT
+          - name: proxy_server_side_latency_ms
+            data-type: INT
+          - name: proxy_client_side_version
+            data-type: STRING
+          - name: proxy_server_side_version
+            data-type: STRING
+          - name: proxy_cert_verify
+            data-type: INT
+          - name: proxy_intercept_error
+            data-type: STRING
+          - name: monitor_mirrored_pkts
+            data-type: INT
+          - name: monitor_mirrored_bytes
+            data-type: INT
+          ## Source
+          - name: client_ip
+            data-type: STRING
+          - name: client_port
+            data-type: INT
+          - name: client_os_desc
+            data-type: STRING
+          - name: client_geolocation
+            data-type: STRING
+          - name: client_country
+            data-type: STRING
+          - name: client_super_administrative_area
+            data-type: STRING
+          - name: client_administrative_area
+            data-type: STRING
+          - name: client_sub_administrative_area
+            data-type: STRING
+          - name: client_asn
+            data-type: BIGINT
+          - name: subscriber_id
+            data-type: STRING
+          - name: imei
+            data-type: STRING
+          - name: imsi
+            data-type: STRING
+          - name: phone_number
+            data-type: STRING
+          - name: apn
+            data-type: STRING
+          ## Destination
+          - name: server_ip
+            data-type: STRING
+          - name: server_port
+            data-type: INT
+          - name: server_os_desc
+            data-type: STRING
+          - name: server_geolocation
+            data-type: STRING
+          - name: server_country
+            data-type: STRING
+          - name: server_super_administrative_area
+            data-type: STRING
+          - name: server_administrative_area
+            data-type: STRING
+          - name: server_sub_administrative_area
+            data-type: STRING
+          - name: server_asn
+            data-type: BIGINT
+          - name: server_fqdn
+            data-type: STRING
+          - name: server_domain
+            data-type: STRING
+          - name: fqdn_category_list
+            data-type: ARRAY<INT>
+          ## Application
+          - name: app_transition
+            data-type: STRING
+          - name: app
+            data-type: STRING
+          - name: app_category
+            data-type: STRING
+          - name: app_debug_info
+            data-type: STRING
+          - name: app_content
+            data-type: STRING
+          - name: app_extra_info
+            data-type: STRING
+          ## Protocol
+          - name: ip_protocol
+            data-type: STRING
+          - name: decoded_path
+            data-type: STRING
+          ## Transmission
+          - name: sent_pkts
+            data-type: BIGINT
+          - name: received_pkts
+            data-type: BIGINT
+          - name: sent_bytes
+            data-type: BIGINT
+          - name: received_bytes
+            data-type: BIGINT
+          - name: tcp_c2s_ip_fragments
+            data-type: BIGINT
+          - name: tcp_s2c_ip_fragments
+            data-type: BIGINT
+          - name: tcp_c2s_lost_bytes
+            data-type: BIGINT
+          - name: tcp_s2c_lost_bytes
+            data-type: BIGINT
+          - name: tcp_c2s_o3_pkts
+            data-type: BIGINT
+          - name: tcp_s2c_o3_pkts
+            data-type: BIGINT
+          - name: tcp_c2s_rtx_pkts
+            data-type: BIGINT
+          - name: tcp_s2c_rtx_pkts
+            data-type: BIGINT
+          - name: tcp_c2s_rtx_bytes
+            data-type: BIGINT
+          - name: tcp_s2c_rtx_bytes
+            data-type: BIGINT
+          - name: tcp_rtt_ms
+            data-type: INT
+          - name: tcp_client_isn
+            data-type: BIGINT
+          - name: tcp_server_isn
+            data-type: BIGINT
+          ## Other
+          - name: packet_capture_file
+            data-type: STRING
+          - name: in_src_mac
+            data-type: STRING
+          - name: out_src_mac
+            data-type: STRING
+          - name: in_dest_mac
+            data-type: STRING
+          - name: out_dest_mac
+            data-type: STRING
+          - name: encapsulation
+            data-type: STRING
+          - name: dup_traffic_flag
+            data-type: INT
+          - name: tunnel_id_list
+            data-type: ARRAY<BIGINT>
+          - name: tunnel_endpoint_a_desc
+            data-type: STRING
+          - name: tunnel_endpoint_b_desc
+            data-type: STRING
+          ## SIP
+          - name: sip_call_id
+            data-type: STRING
+          - name: sip_originator_description
+            data-type: STRING
+          - name: sip_responder_description
+            data-type: STRING
+          - name: sip_user_agent
+            data-type: STRING
+          - name: sip_server
+            data-type: STRING
+          - name: sip_originator_sdp_connect_ip
+            data-type: STRING
+          - name: sip_originator_sdp_media_port
+            data-type: INT
+          - name: sip_originator_sdp_media_type
+            data-type: STRING
+          - name: sip_originator_sdp_content
+            data-type: STRING
+          - name: sip_responder_sdp_connect_ip
+            data-type: STRING
+          - name: sip_responder_sdp_media_port
+            data-type: INT
+          - name: sip_responder_sdp_media_type
+            data-type: STRING
+          - name: sip_responder_sdp_content
+            data-type: STRING
+          - name: sip_duration_s
+            data-type: INT
+          - name: sip_bye
+            data-type: STRING
+          - name: sip_bye_reason
+            data-type: STRING
+          ## RTP
+          - name: rtp_payload_type_c2s
+            data-type: INT
+          - name: rtp_payload_type_s2c
+            data-type: INT
+          - name: rtp_pcap_path
+            data-type: STRING
+          - name: rtp_originator_dir
+            data-type: INT
+    where:
+      - on: sip-records
+        key-by: vsys_id, sip_call_id, SORT_ADDRESS( client_ip, client_port, server_ip, server_port )
+        process:
+          - if: STREAM_DIR(flags) != 3 && @v1.isNotNull && STREAM_DIR(@v1.$flags) != STREAM_DIR(flags)
+            then:
+              - |-
+                OUTPUT ok FROM withColumns(recv_time to device_tag), 
+                      DISTINCT_CONCAT(@v1.$data_center, data_center) AS data_center,
+                      DISTINCT_CONCAT(@v1.$device_group, device_group) AS device_group,
+                      withColumns(sled_ip to t_vsys_id),
+                      STREAM_DIR_SET(flags) AS flags,
+                      withColumns(flags_identify_info to decoded_path),
+                      @v1.$sent_pkts + sent_pkts AS sent_pkts, 
+                      @v1.$received_pkts + received_pkts AS received_pkts, 
+                      @v1.$sent_bytes + sent_bytes AS sent_bytes, 
+                      @v1.$received_bytes + received_bytes AS received_bytes ,
+                      withColumns(tcp_c2s_ip_fragments to sip_call_id),
+                      FIND_NOT_BLANK(@v1.$sip_originator_description, sip_originator_description) AS sip_originator_description,
+                      FIND_NOT_BLANK(@v1.$sip_responder_description, sip_responder_description) AS sip_responder_description,
+                      FIND_NOT_BLANK(@v1.$sip_user_agent, sip_user_agent) AS sip_user_agent,
+                      FIND_NOT_BLANK(@v1.$sip_server, sip_server) AS sip_server,
+                      FIND_NOT_BLANK(@v1.$sip_originator_sdp_connect_ip, sip_originator_sdp_connect_ip) AS sip_originator_sdp_connect_ip,
+                      (@v1.$sip_originator_sdp_media_port > 0).?(@v1.$sip_originator_sdp_media_port, sip_originator_sdp_media_port) AS sip_originator_sdp_media_port,
+                      FIND_NOT_BLANK(@v1.$sip_originator_sdp_media_type, sip_originator_sdp_media_type) AS sip_originator_sdp_media_type,
+                      FIND_NOT_BLANK(@v1.$sip_originator_sdp_content, sip_originator_sdp_content) AS sip_originator_sdp_content,
+                      FIND_NOT_BLANK(@v1.$sip_responder_sdp_connect_ip, sip_responder_sdp_connect_ip) AS sip_responder_sdp_connect_ip,
+                      (@v1.$sip_responder_sdp_media_port > 0).?(@v1.$sip_responder_sdp_media_port, sip_responder_sdp_media_port) AS sip_responder_sdp_media_port,
+                      FIND_NOT_BLANK(@v1.$sip_responder_sdp_media_type, sip_responder_sdp_media_type) AS sip_responder_sdp_media_type,
+                      FIND_NOT_BLANK(@v1.$sip_responder_sdp_content, sip_responder_sdp_content) AS sip_responder_sdp_content,
+                      @v1.$sip_duration_s + sip_duration_s AS sip_duration_s,
+                      FIND_NOT_BLANK(@v1.$sip_bye, sip_bye) AS sip_bye,
+                      FIND_NOT_BLANK(@v1.$sip_bye_reason, sip_bye_reason) AS sip_bye_reason,
+                      rtp_payload_type_c2s,
+                      rtp_payload_type_s2c,
+                      rtp_pcap_path,
+                      rtp_originator_dir
+              - TRUNCATE v1
+          # Duplicate SIP inbound data, if discarded please comment out the following if:
+          - if: STREAM_DIR(flags) != 3 && @v1.isNotNull && STREAM_DIR(@v1.$flags) == STREAM_DIR(flags)
+            then:
+              - |-
+                OUTPUT fail FROM withColumns(recv_time to rtp_originator_dir)
+          - if: STREAM_DIR(flags) != 3 && @v1.isNull
+            then:
+              - |-
+                SET v1 FROM withColumns(recv_time to rtp_originator_dir)
+          - if: STREAM_DIR(flags) == 3
+            then:
+              - |-
+                OUTPUT ok FROM withColumns(recv_time to rtp_originator_dir)
+          - SCHEDULING USING PROCESS TIME FOR NOW + 60 * 1000
+    schedule:
+      - if: '@v1.isNotNull'
+        then:
+          - |-
+            OUTPUT fail FROM @v1.$recv_time AS recv_time,
+                          @v1.$log_id AS log_id,
+                          @v1.$decoded_as AS decoded_as,
+                          @v1.$session_id AS session_id,
+                          @v1.$start_timestamp_ms AS start_timestamp_ms,
+                          @v1.$start_timestamp AS start_timestamp,
+                          @v1.$end_timestamp_ms AS end_timestamp_ms,
+                          @v1.$duration_ms AS duration_ms,
+                          @v1.$tcp_handshake_latency_ms AS tcp_handshake_latency_ms,
+                          @v1.$ingestion_time AS ingestion_time,
+                          @v1.$processing_time AS processing_time,
+                          @v1.$insert_time AS insert_time,
+                          @v1.$device_id AS device_id,
+                          @v1.$out_link_id AS out_link_id,
+                          @v1.$in_link_id AS in_link_id,
+                          @v1.$device_tag AS device_tag,
+                          @v1.$data_center AS data_center,
+                          @v1.$device_group AS device_group,
+                          @v1.$sled_ip AS sled_ip,
+                          @v1.$address_type AS address_type,
+                          @v1.$direction AS direction,
+                          @v1.$vsys_id AS vsys_id,
+                          @v1.$t_vsys_id AS t_vsys_id,
+                          @v1.$flags AS flags,
+                          @v1.$flags_identify_info AS flags_identify_info,
+                          @v1.$c2s_ttl AS c2s_ttl,
+                          @v1.$s2c_ttl AS s2c_ttl,
+                          @v1.$security_rule_list AS security_rule_list,
+                          @v1.$security_action AS security_action,
+                          @v1.$monitor_rule_list AS monitor_rule_list,
+                          @v1.$shaping_rule_list AS shaping_rule_list,
+                          @v1.$proxy_rule_list AS proxy_rule_list,
+                          @v1.$statistics_rule_list AS statistics_rule_list,
+                          @v1.$sc_rule_list AS sc_rule_list,
+                          @v1.$sc_rsp_raw AS sc_rsp_raw,
+                          @v1.$sc_rsp_decrypted AS sc_rsp_decrypted,
+                          @v1.$proxy_action AS proxy_action,
+                          @v1.$proxy_pinning_status AS proxy_pinning_status,
+                          @v1.$proxy_intercept_status AS proxy_intercept_status,
+                          @v1.$proxy_passthrough_reason AS proxy_passthrough_reason,
+                          @v1.$proxy_client_side_latency_ms AS proxy_client_side_latency_ms,
+                          @v1.$proxy_server_side_latency_ms AS proxy_server_side_latency_ms,
+                          @v1.$proxy_client_side_version AS proxy_client_side_version,
+                          @v1.$proxy_server_side_version AS proxy_server_side_version,
+                          @v1.$proxy_cert_verify AS proxy_cert_verify,
+                          @v1.$proxy_intercept_error AS proxy_intercept_error,
+                          @v1.$monitor_mirrored_pkts AS monitor_mirrored_pkts,
+                          @v1.$monitor_mirrored_bytes AS monitor_mirrored_bytes,
+                          @v1.$client_ip AS client_ip,
+                          @v1.$client_port AS client_port,
+                          @v1.$client_os_desc AS client_os_desc,
+                          @v1.$client_geolocation AS client_geolocation,
+                          @v1.$client_country AS client_country,
+                          @v1.$client_super_administrative_area AS client_super_administrative_area,
+                          @v1.$client_administrative_area AS client_administrative_area,
+                          @v1.$client_sub_administrative_area AS client_sub_administrative_area,
+                          @v1.$client_asn AS client_asn,
+                          @v1.$subscriber_id AS subscriber_id,
+                          @v1.$imei AS imei,
+                          @v1.$imsi AS imsi,
+                          @v1.$phone_number AS phone_number,
+                          @v1.$apn AS apn,
+                          @v1.$server_ip AS server_ip,
+                          @v1.$server_port AS server_port,
+                          @v1.$server_os_desc AS server_os_desc,
+                          @v1.$server_geolocation AS server_geolocation,
+                          @v1.$server_country AS server_country,
+                          @v1.$server_super_administrative_area AS server_super_administrative_area,
+                          @v1.$server_administrative_area AS server_administrative_area,
+                          @v1.$server_sub_administrative_area AS server_sub_administrative_area,
+                          @v1.$server_asn AS server_asn,
+                          @v1.$server_fqdn AS server_fqdn,
+                          @v1.$server_domain AS server_domain,
+                          @v1.$fqdn_category_list AS fqdn_category_list,
+                          @v1.$app_transition AS app_transition,
+                          @v1.$app AS app,
+                          @v1.$app_category AS app_category,
+                          @v1.$app_debug_info AS app_debug_info,
+                          @v1.$app_content AS app_content,
+                          @v1.$app_extra_info AS app_extra_info,
+                          @v1.$ip_protocol AS ip_protocol,
+                          @v1.$decoded_path AS decoded_path,
+                          @v1.$sent_pkts AS sent_pkts,
+                          @v1.$received_pkts AS received_pkts,
+                          @v1.$sent_bytes AS sent_bytes,
+                          @v1.$received_bytes AS received_bytes,
+                          @v1.$tcp_c2s_ip_fragments AS tcp_c2s_ip_fragments,
+                          @v1.$tcp_s2c_ip_fragments AS tcp_s2c_ip_fragments,
+                          @v1.$tcp_c2s_lost_bytes AS tcp_c2s_lost_bytes,
+                          @v1.$tcp_s2c_lost_bytes AS tcp_s2c_lost_bytes,
+                          @v1.$tcp_c2s_o3_pkts AS tcp_c2s_o3_pkts,
+                          @v1.$tcp_s2c_o3_pkts AS tcp_s2c_o3_pkts,
+                          @v1.$tcp_c2s_rtx_pkts AS tcp_c2s_rtx_pkts,
+                          @v1.$tcp_s2c_rtx_pkts AS tcp_s2c_rtx_pkts,
+                          @v1.$tcp_c2s_rtx_bytes AS tcp_c2s_rtx_bytes,
+                          @v1.$tcp_s2c_rtx_bytes AS tcp_s2c_rtx_bytes,
+                          @v1.$tcp_rtt_ms AS tcp_rtt_ms,
+                          @v1.$tcp_client_isn AS tcp_client_isn,
+                          @v1.$tcp_server_isn AS tcp_server_isn,
+                          @v1.$packet_capture_file AS packet_capture_file,
+                          @v1.$in_src_mac AS in_src_mac,
+                          @v1.$out_src_mac AS out_src_mac,
+                          @v1.$in_dest_mac AS in_dest_mac,
+                          @v1.$out_dest_mac AS out_dest_mac,
+                          @v1.$encapsulation AS encapsulation,
+                          @v1.$dup_traffic_flag AS dup_traffic_flag,
+                          @v1.$tunnel_id_list AS tunnel_id_list,
+                          @v1.$tunnel_endpoint_a_desc AS tunnel_endpoint_a_desc,
+                          @v1.$tunnel_endpoint_b_desc AS tunnel_endpoint_b_desc,
+                          @v1.$sip_call_id AS sip_call_id,
+                          @v1.$sip_originator_description AS sip_originator_description,
+                          @v1.$sip_responder_description AS sip_responder_description,
+                          @v1.$sip_user_agent AS sip_user_agent,
+                          @v1.$sip_server AS sip_server,
+                          @v1.$sip_originator_sdp_connect_ip AS sip_originator_sdp_connect_ip,
+                          @v1.$sip_originator_sdp_media_port AS sip_originator_sdp_media_port,
+                          @v1.$sip_originator_sdp_media_type AS sip_originator_sdp_media_type,
+                          @v1.$sip_originator_sdp_content AS sip_originator_sdp_content,
+                          @v1.$sip_responder_sdp_connect_ip AS sip_responder_sdp_connect_ip,
+                          @v1.$sip_responder_sdp_media_port AS sip_responder_sdp_media_port,
+                          @v1.$sip_responder_sdp_media_type AS sip_responder_sdp_media_type,
+                          @v1.$sip_responder_sdp_content AS sip_responder_sdp_content,
+                          @v1.$sip_duration_s AS sip_duration_s,
+                          @v1.$sip_bye AS sip_bye,
+                          @v1.$sip_bye_reason AS sip_bye_reason,
+                          @v1.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
+                          @v1.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
+                          @v1.$rtp_pcap_path AS rtp_pcap_path,
+                          @v1.$rtp_originator_dir AS rtp_originator_dir
+          - TRUNCATE v1
+  - name: voip-fusion
+    category: CORRELATE
+    cache:
+      - name: sip
+        type: VALUE
+        ttl: 7 minute
+        schema:
+          ## General
+          - name: recv_time
+            data-type: BIGINT
+          - name: log_id
+            data-type: BIGINT
+          - name: decoded_as
+            data-type: STRING NOT NULL
+          - name: session_id
+            data-type: BIGINT NOT NULL
+          - name: start_timestamp_ms
+            data-type: BIGINT NOT NULL
+          # row-time:
+          - name: start_timestamp
+            data-type: TIMESTAMP_LTZ(3)
+          - name: end_timestamp_ms
+            data-type: BIGINT
+          - name: duration_ms
+            data-type: INT
+          - name: tcp_handshake_latency_ms
+            data-type: INT
+          - name: ingestion_time
+            data-type: BIGINT
+          - name: processing_time
+            data-type: BIGINT
+          - name: insert_time
+            data-type: BIGINT
+          - name: device_id
+            data-type: STRING
+          - name: out_link_id
+            data-type: INT
+          - name: in_link_id
+            data-type: INT
+          - name: device_tag
+            data-type: STRING
+          - name: data_center
+            data-type: STRING
+          - name: device_group
+            data-type: STRING
+          - name: sled_ip
+            data-type: STRING
+          - name: address_type
+            data-type: INT
+          - name: direction
+            data-type: STRING
+          - name: vsys_id
+            data-type: INT
+          - name: t_vsys_id
+            data-type: INT
+          - name: flags
+            data-type: BIGINT
+          - name: flags_identify_info
+            data-type: STRING
+          - name: c2s_ttl
+            data-type: INT
+          - name: s2c_ttl
+            data-type: INT
+          ## Treatment
+          - name: security_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: security_action
+            data-type: STRING
+          - name: monitor_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: shaping_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: proxy_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: statistics_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: sc_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: sc_rsp_raw
+            data-type: ARRAY<BIGINT>
+          - name: sc_rsp_decrypted
+            data-type: ARRAY<BIGINT>
+          - name: proxy_action
+            data-type: STRING
+          - name: proxy_pinning_status
+            data-type: INT
+          - name: proxy_intercept_status
+            data-type: INT
+          - name: proxy_passthrough_reason
+            data-type: STRING
+          - name: proxy_client_side_latency_ms
+            data-type: INT
+          - name: proxy_server_side_latency_ms
+            data-type: INT
+          - name: proxy_client_side_version
+            data-type: STRING
+          - name: proxy_server_side_version
+            data-type: STRING
+          - name: proxy_cert_verify
+            data-type: INT
+          - name: proxy_intercept_error
+            data-type: STRING
+          - name: monitor_mirrored_pkts
+            data-type: INT
+          - name: monitor_mirrored_bytes
+            data-type: INT
+          ## Source
+          - name: client_ip
+            data-type: STRING
+          - name: client_port
+            data-type: INT
+          - name: client_os_desc
+            data-type: STRING
+          - name: client_geolocation
+            data-type: STRING
+          - name: client_country
+            data-type: STRING
+          - name: client_super_administrative_area
+            data-type: STRING
+          - name: client_administrative_area
+            data-type: STRING
+          - name: client_sub_administrative_area
+            data-type: STRING
+          - name: client_asn
+            data-type: BIGINT
+          - name: subscriber_id
+            data-type: STRING
+          - name: imei
+            data-type: STRING
+          - name: imsi
+            data-type: STRING
+          - name: phone_number
+            data-type: STRING
+          - name: apn
+            data-type: STRING
+          ## Destination
+          - name: server_ip
+            data-type: STRING
+          - name: server_port
+            data-type: INT
+          - name: server_os_desc
+            data-type: STRING
+          - name: server_geolocation
+            data-type: STRING
+          - name: server_country
+            data-type: STRING
+          - name: server_super_administrative_area
+            data-type: STRING
+          - name: server_administrative_area
+            data-type: STRING
+          - name: server_sub_administrative_area
+            data-type: STRING
+          - name: server_asn
+            data-type: BIGINT
+          - name: server_fqdn
+            data-type: STRING
+          - name: server_domain
+            data-type: STRING
+          - name: fqdn_category_list
+            data-type: ARRAY<INT>
+          ## Application
+          - name: app_transition
+            data-type: STRING
+          - name: app
+            data-type: STRING
+          - name: app_category
+            data-type: STRING
+          - name: app_debug_info
+            data-type: STRING
+          - name: app_content
+            data-type: STRING
+          - name: app_extra_info
+            data-type: STRING
+          ## Protocol
+          - name: ip_protocol
+            data-type: STRING
+          - name: decoded_path
+            data-type: STRING
+          ## Transmission
+          - name: sent_pkts
+            data-type: BIGINT
+          - name: received_pkts
+            data-type: BIGINT
+          - name: sent_bytes
+            data-type: BIGINT
+          - name: received_bytes
+            data-type: BIGINT
+          - name: tcp_c2s_ip_fragments
+            data-type: BIGINT
+          - name: tcp_s2c_ip_fragments
+            data-type: BIGINT
+          - name: tcp_c2s_lost_bytes
+            data-type: BIGINT
+          - name: tcp_s2c_lost_bytes
+            data-type: BIGINT
+          - name: tcp_c2s_o3_pkts
+            data-type: BIGINT
+          - name: tcp_s2c_o3_pkts
+            data-type: BIGINT
+          - name: tcp_c2s_rtx_pkts
+            data-type: BIGINT
+          - name: tcp_s2c_rtx_pkts
+            data-type: BIGINT
+          - name: tcp_c2s_rtx_bytes
+            data-type: BIGINT
+          - name: tcp_s2c_rtx_bytes
+            data-type: BIGINT
+          - name: tcp_rtt_ms
+            data-type: INT
+          - name: tcp_client_isn
+            data-type: BIGINT
+          - name: tcp_server_isn
+            data-type: BIGINT
+          ## Other
+          - name: packet_capture_file
+            data-type: STRING
+          - name: in_src_mac
+            data-type: STRING
+          - name: out_src_mac
+            data-type: STRING
+          - name: in_dest_mac
+            data-type: STRING
+          - name: out_dest_mac
+            data-type: STRING
+          - name: encapsulation
+            data-type: STRING
+          - name: dup_traffic_flag
+            data-type: INT
+          - name: tunnel_id_list
+            data-type: ARRAY<BIGINT>
+          - name: tunnel_endpoint_a_desc
+            data-type: STRING
+          - name: tunnel_endpoint_b_desc
+            data-type: STRING
+          ## SIP
+          - name: sip_call_id
+            data-type: STRING
+          - name: sip_originator_description
+            data-type: STRING
+          - name: sip_responder_description
+            data-type: STRING
+          - name: sip_user_agent
+            data-type: STRING
+          - name: sip_server
+            data-type: STRING
+          - name: sip_originator_sdp_connect_ip
+            data-type: STRING
+          - name: sip_originator_sdp_media_port
+            data-type: INT
+          - name: sip_originator_sdp_media_type
+            data-type: STRING
+          - name: sip_originator_sdp_content
+            data-type: STRING
+          - name: sip_responder_sdp_connect_ip
+            data-type: STRING
+          - name: sip_responder_sdp_media_port
+            data-type: INT
+          - name: sip_responder_sdp_media_type
+            data-type: STRING
+          - name: sip_responder_sdp_content
+            data-type: STRING
+          - name: sip_duration_s
+            data-type: INT
+          - name: sip_bye
+            data-type: STRING
+          - name: sip_bye_reason
+            data-type: STRING
+          ## RTP
+          - name: rtp_payload_type_c2s
+            data-type: INT
+          - name: rtp_payload_type_s2c
+            data-type: INT
+          - name: rtp_pcap_path
+            data-type: STRING
+          - name: rtp_originator_dir
+            data-type: INT
+      - name: rtp
+        type: LIST
+        ttl: 7 minute
+        schema:
+          ## General
+          - name: recv_time
+            data-type: BIGINT
+          - name: log_id
+            data-type: BIGINT
+          - name: decoded_as
+            data-type: STRING NOT NULL
+          - name: session_id
+            data-type: BIGINT NOT NULL
+          - name: start_timestamp_ms
+            data-type: BIGINT NOT NULL
+          # row-time:
+          - name: start_timestamp
+            data-type: TIMESTAMP_LTZ(3)
+          - name: end_timestamp_ms
+            data-type: BIGINT
+          - name: duration_ms
+            data-type: INT
+          - name: tcp_handshake_latency_ms
+            data-type: INT
+          - name: ingestion_time
+            data-type: BIGINT
+          - name: processing_time
+            data-type: BIGINT
+          - name: insert_time
+            data-type: BIGINT
+          - name: device_id
+            data-type: STRING
+          - name: out_link_id
+            data-type: INT
+          - name: in_link_id
+            data-type: INT
+          - name: device_tag
+            data-type: STRING
+          - name: data_center
+            data-type: STRING
+          - name: device_group
+            data-type: STRING
+          - name: sled_ip
+            data-type: STRING
+          - name: address_type
+            data-type: INT
+          - name: direction
+            data-type: STRING
+          - name: vsys_id
+            data-type: INT
+          - name: t_vsys_id
+            data-type: INT
+          - name: flags
+            data-type: BIGINT
+          - name: flags_identify_info
+            data-type: STRING
+          - name: c2s_ttl
+            data-type: INT
+          - name: s2c_ttl
+            data-type: INT
+          ## Treatment
+          - name: security_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: security_action
+            data-type: STRING
+          - name: monitor_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: shaping_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: proxy_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: statistics_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: sc_rule_list
+            data-type: ARRAY<BIGINT>
+          - name: sc_rsp_raw
+            data-type: ARRAY<BIGINT>
+          - name: sc_rsp_decrypted
+            data-type: ARRAY<BIGINT>
+          - name: proxy_action
+            data-type: STRING
+          - name: proxy_pinning_status
+            data-type: INT
+          - name: proxy_intercept_status
+            data-type: INT
+          - name: proxy_passthrough_reason
+            data-type: STRING
+          - name: proxy_client_side_latency_ms
+            data-type: INT
+          - name: proxy_server_side_latency_ms
+            data-type: INT
+          - name: proxy_client_side_version
+            data-type: STRING
+          - name: proxy_server_side_version
+            data-type: STRING
+          - name: proxy_cert_verify
+            data-type: INT
+          - name: proxy_intercept_error
+            data-type: STRING
+          - name: monitor_mirrored_pkts
+            data-type: INT
+          - name: monitor_mirrored_bytes
+            data-type: INT
+          ## Source
+          - name: client_ip
+            data-type: STRING
+          - name: client_port
+            data-type: INT
+          - name: client_os_desc
+            data-type: STRING
+          - name: client_geolocation
+            data-type: STRING
+          - name: client_country
+            data-type: STRING
+          - name: client_super_administrative_area
+            data-type: STRING
+          - name: client_administrative_area
+            data-type: STRING
+          - name: client_sub_administrative_area
+            data-type: STRING
+          - name: client_asn
+            data-type: BIGINT
+          - name: subscriber_id
+            data-type: STRING
+          - name: imei
+            data-type: STRING
+          - name: imsi
+            data-type: STRING
+          - name: phone_number
+            data-type: STRING
+          - name: apn
+            data-type: STRING
+          ## Destination
+          - name: server_ip
+            data-type: STRING
+          - name: server_port
+            data-type: INT
+          - name: server_os_desc
+            data-type: STRING
+          - name: server_geolocation
+            data-type: STRING
+          - name: server_country
+            data-type: STRING
+          - name: server_super_administrative_area
+            data-type: STRING
+          - name: server_administrative_area
+            data-type: STRING
+          - name: server_sub_administrative_area
+            data-type: STRING
+          - name: server_asn
+            data-type: BIGINT
+          - name: server_fqdn
+            data-type: STRING
+          - name: server_domain
+            data-type: STRING
+          - name: fqdn_category_list
+            data-type: ARRAY<INT>
+          ## Application
+          - name: app_transition
+            data-type: STRING
+          - name: app
+            data-type: STRING
+          - name: app_category
+            data-type: STRING
+          - name: app_debug_info
+            data-type: STRING
+          - name: app_content
+            data-type: STRING
+          - name: app_extra_info
+            data-type: STRING
+          ## Protocol
+          - name: ip_protocol
+            data-type: STRING
+          - name: decoded_path
+            data-type: STRING
+          ## Transmission
+          - name: sent_pkts
+            data-type: BIGINT
+          - name: received_pkts
+            data-type: BIGINT
+          - name: sent_bytes
+            data-type: BIGINT
+          - name: received_bytes
+            data-type: BIGINT
+          - name: tcp_c2s_ip_fragments
+            data-type: BIGINT
+          - name: tcp_s2c_ip_fragments
+            data-type: BIGINT
+          - name: tcp_c2s_lost_bytes
+            data-type: BIGINT
+          - name: tcp_s2c_lost_bytes
+            data-type: BIGINT
+          - name: tcp_c2s_o3_pkts
+            data-type: BIGINT
+          - name: tcp_s2c_o3_pkts
+            data-type: BIGINT
+          - name: tcp_c2s_rtx_pkts
+            data-type: BIGINT
+          - name: tcp_s2c_rtx_pkts
+            data-type: BIGINT
+          - name: tcp_c2s_rtx_bytes
+            data-type: BIGINT
+          - name: tcp_s2c_rtx_bytes
+            data-type: BIGINT
+          - name: tcp_rtt_ms
+            data-type: INT
+          - name: tcp_client_isn
+            data-type: BIGINT
+          - name: tcp_server_isn
+            data-type: BIGINT
+          ## Other
+          - name: packet_capture_file
+            data-type: STRING
+          - name: in_src_mac
+            data-type: STRING
+          - name: out_src_mac
+            data-type: STRING
+          - name: in_dest_mac
+            data-type: STRING
+          - name: out_dest_mac
+            data-type: STRING
+          - name: encapsulation
+            data-type: STRING
+          - name: dup_traffic_flag
+            data-type: INT
+          - name: tunnel_id_list
+            data-type: ARRAY<BIGINT>
+          - name: tunnel_endpoint_a_desc
+            data-type: STRING
+          - name: tunnel_endpoint_b_desc
+            data-type: STRING
+          ## SIP
+          - name: sip_call_id
+            data-type: STRING
+          - name: sip_originator_description
+            data-type: STRING
+          - name: sip_responder_description
+            data-type: STRING
+          - name: sip_user_agent
+            data-type: STRING
+          - name: sip_server
+            data-type: STRING
+          - name: sip_originator_sdp_connect_ip
+            data-type: STRING
+          - name: sip_originator_sdp_media_port
+            data-type: INT
+          - name: sip_originator_sdp_media_type
+            data-type: STRING
+          - name: sip_originator_sdp_content
+            data-type: STRING
+          - name: sip_responder_sdp_connect_ip
+            data-type: STRING
+          - name: sip_responder_sdp_media_port
+            data-type: INT
+          - name: sip_responder_sdp_media_type
+            data-type: STRING
+          - name: sip_responder_sdp_content
+            data-type: STRING
+          - name: sip_duration_s
+            data-type: INT
+          - name: sip_bye
+            data-type: STRING
+          - name: sip_bye_reason
+            data-type: STRING
+          ## RTP
+          - name: rtp_payload_type_c2s
+            data-type: INT
+          - name: rtp_payload_type_s2c
+            data-type: INT
+          - name: rtp_pcap_path
+            data-type: STRING
+          - name: rtp_originator_dir
+            data-type: INT
+    where:
+      - on: sip-double-way-records.ok
+        key-by: vsys_id, SORT_ADDRESS( sip_originator_sdp_connect_ip, sip_originator_sdp_media_port, sip_responder_sdp_connect_ip, sip_responder_sdp_media_port ) AS address
+        # SIP
+        process:
+          # Duplicate SIP inbound data, if discarded please comment out the following if:
+          - if: '@sip.isNotNull'
+            then:
+              - |-
+                OUTPUT fail FROM @sip.$recv_time AS recv_time,
+                            @sip.$log_id AS log_id,
+                            @sip.$decoded_as AS decoded_as,
+                            @sip.$session_id AS session_id,
+                            @sip.$start_timestamp_ms AS start_timestamp_ms,
+                            @sip.$start_timestamp AS start_timestamp,
+                            @sip.$end_timestamp_ms AS end_timestamp_ms,
+                            @sip.$duration_ms AS duration_ms,
+                            @sip.$tcp_handshake_latency_ms AS tcp_handshake_latency_ms,
+                            @sip.$ingestion_time AS ingestion_time,
+                            @sip.$processing_time AS processing_time,
+                            @sip.$insert_time AS insert_time,
+                            @sip.$device_id AS device_id,
+                            @sip.$out_link_id AS out_link_id,
+                            @sip.$in_link_id AS in_link_id,
+                            @sip.$device_tag AS device_tag,
+                            @sip.$data_center AS data_center,
+                            @sip.$device_group AS device_group,
+                            @sip.$sled_ip AS sled_ip,
+                            @sip.$address_type AS address_type,
+                            @sip.$direction AS direction,
+                            @sip.$vsys_id AS vsys_id,
+                            @sip.$t_vsys_id AS t_vsys_id,
+                            @sip.$flags AS flags,
+                            @sip.$flags_identify_info AS flags_identify_info,
+                            @sip.$c2s_ttl AS c2s_ttl,
+                            @sip.$s2c_ttl AS s2c_ttl,
+                            @sip.$security_rule_list AS security_rule_list,
+                            @sip.$security_action AS security_action,
+                            @sip.$monitor_rule_list AS monitor_rule_list,
+                            @sip.$shaping_rule_list AS shaping_rule_list,
+                            @sip.$proxy_rule_list AS proxy_rule_list,
+                            @sip.$statistics_rule_list AS statistics_rule_list,
+                            @sip.$sc_rule_list AS sc_rule_list,
+                            @sip.$sc_rsp_raw AS sc_rsp_raw,
+                            @sip.$sc_rsp_decrypted AS sc_rsp_decrypted,
+                            @sip.$proxy_action AS proxy_action,
+                            @sip.$proxy_pinning_status AS proxy_pinning_status,
+                            @sip.$proxy_intercept_status AS proxy_intercept_status,
+                            @sip.$proxy_passthrough_reason AS proxy_passthrough_reason,
+                            @sip.$proxy_client_side_latency_ms AS proxy_client_side_latency_ms,
+                            @sip.$proxy_server_side_latency_ms AS proxy_server_side_latency_ms,
+                            @sip.$proxy_client_side_version AS proxy_client_side_version,
+                            @sip.$proxy_server_side_version AS proxy_server_side_version,
+                            @sip.$proxy_cert_verify AS proxy_cert_verify,
+                            @sip.$proxy_intercept_error AS proxy_intercept_error,
+                            @sip.$monitor_mirrored_pkts AS monitor_mirrored_pkts,
+                            @sip.$monitor_mirrored_bytes AS monitor_mirrored_bytes,
+                            @sip.$client_ip AS client_ip,
+                            @sip.$client_port AS client_port,
+                            @sip.$client_os_desc AS client_os_desc,
+                            @sip.$client_geolocation AS client_geolocation,
+                            @sip.$client_country AS client_country,
+                            @sip.$client_super_administrative_area AS client_super_administrative_area,
+                            @sip.$client_administrative_area AS client_administrative_area,
+                            @sip.$client_sub_administrative_area AS client_sub_administrative_area,
+                            @sip.$client_asn AS client_asn,
+                            @sip.$subscriber_id AS subscriber_id,
+                            @sip.$imei AS imei,
+                            @sip.$imsi AS imsi,
+                            @sip.$phone_number AS phone_number,
+                            @sip.$apn AS apn,
+                            @sip.$server_ip AS server_ip,
+                            @sip.$server_port AS server_port,
+                            @sip.$server_os_desc AS server_os_desc,
+                            @sip.$server_geolocation AS server_geolocation,
+                            @sip.$server_country AS server_country,
+                            @sip.$server_super_administrative_area AS server_super_administrative_area,
+                            @sip.$server_administrative_area AS server_administrative_area,
+                            @sip.$server_sub_administrative_area AS server_sub_administrative_area,
+                            @sip.$server_asn AS server_asn,
+                            @sip.$server_fqdn AS server_fqdn,
+                            @sip.$server_domain AS server_domain,
+                            @sip.$fqdn_category_list AS fqdn_category_list,
+                            @sip.$app_transition AS app_transition,
+                            @sip.$app AS app,
+                            @sip.$app_category AS app_category,
+                            @sip.$app_debug_info AS app_debug_info,
+                            @sip.$app_content AS app_content,
+                            @sip.$app_extra_info AS app_extra_info,
+                            @sip.$ip_protocol AS ip_protocol,
+                            @sip.$decoded_path AS decoded_path,
+                            @sip.$sent_pkts AS sent_pkts,
+                            @sip.$received_pkts AS received_pkts,
+                            @sip.$sent_bytes AS sent_bytes,
+                            @sip.$received_bytes AS received_bytes,
+                            @sip.$tcp_c2s_ip_fragments AS tcp_c2s_ip_fragments,
+                            @sip.$tcp_s2c_ip_fragments AS tcp_s2c_ip_fragments,
+                            @sip.$tcp_c2s_lost_bytes AS tcp_c2s_lost_bytes,
+                            @sip.$tcp_s2c_lost_bytes AS tcp_s2c_lost_bytes,
+                            @sip.$tcp_c2s_o3_pkts AS tcp_c2s_o3_pkts,
+                            @sip.$tcp_s2c_o3_pkts AS tcp_s2c_o3_pkts,
+                            @sip.$tcp_c2s_rtx_pkts AS tcp_c2s_rtx_pkts,
+                            @sip.$tcp_s2c_rtx_pkts AS tcp_s2c_rtx_pkts,
+                            @sip.$tcp_c2s_rtx_bytes AS tcp_c2s_rtx_bytes,
+                            @sip.$tcp_s2c_rtx_bytes AS tcp_s2c_rtx_bytes,
+                            @sip.$tcp_rtt_ms AS tcp_rtt_ms,
+                            @sip.$tcp_client_isn AS tcp_client_isn,
+                            @sip.$tcp_server_isn AS tcp_server_isn,
+                            @sip.$packet_capture_file AS packet_capture_file,
+                            @sip.$in_src_mac AS in_src_mac,
+                            @sip.$out_src_mac AS out_src_mac,
+                            @sip.$in_dest_mac AS in_dest_mac,
+                            @sip.$out_dest_mac AS out_dest_mac,
+                            @sip.$encapsulation AS encapsulation,
+                            @sip.$dup_traffic_flag AS dup_traffic_flag,
+                            @sip.$tunnel_id_list AS tunnel_id_list,
+                            @sip.$tunnel_endpoint_a_desc AS tunnel_endpoint_a_desc,
+                            @sip.$tunnel_endpoint_b_desc AS tunnel_endpoint_b_desc,
+                            @sip.$sip_call_id AS sip_call_id,
+                            @sip.$sip_originator_description AS sip_originator_description,
+                            @sip.$sip_responder_description AS sip_responder_description,
+                            @sip.$sip_user_agent AS sip_user_agent,
+                            @sip.$sip_server AS sip_server,
+                            @sip.$sip_originator_sdp_connect_ip AS sip_originator_sdp_connect_ip,
+                            @sip.$sip_originator_sdp_media_port AS sip_originator_sdp_media_port,
+                            @sip.$sip_originator_sdp_media_type AS sip_originator_sdp_media_type,
+                            @sip.$sip_originator_sdp_content AS sip_originator_sdp_content,
+                            @sip.$sip_responder_sdp_connect_ip AS sip_responder_sdp_connect_ip,
+                            @sip.$sip_responder_sdp_media_port AS sip_responder_sdp_media_port,
+                            @sip.$sip_responder_sdp_media_type AS sip_responder_sdp_media_type,
+                            @sip.$sip_responder_sdp_content AS sip_responder_sdp_content,
+                            @sip.$sip_duration_s AS sip_duration_s,
+                            @sip.$sip_bye AS sip_bye,
+                            @sip.$sip_bye_reason AS sip_bye_reason,
+                            @sip.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
+                            @sip.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
+                            @sip.$rtp_pcap_path AS rtp_pcap_path,
+                            @sip.$rtp_originator_dir AS rtp_originator_dir
+          - SET sip FROM withColumns(recv_time to rtp_originator_dir)
+          - if: '@rtp.isNotNull && @rtp.cardinality > 0'
+            then:
+              - |-
+                FLAT OUTPUT ok FOR i IN rtp FROM 
+                        @i.$recv_time AS recv_time,
+                        @i.$log_id AS log_id,
+                        'VoIP' AS decoded_as,
+                        @i.$session_id AS session_id,
+                        @i.$start_timestamp_ms AS start_timestamp_ms,
+                        @i.$end_timestamp_ms AS end_timestamp_ms,
+                        @i.$duration_ms AS duration_ms,
+                        @i.$tcp_handshake_latency_ms AS tcp_handshake_latency_ms,
+                        @i.$ingestion_time AS ingestion_time,
+                        @i.$processing_time AS processing_time,
+                        @i.$insert_time AS insert_time,
+                        @i.$device_id AS device_id,
+                        @i.$out_link_id AS out_link_id,
+                        @i.$in_link_id AS in_link_id,
+                        @i.$device_tag AS device_tag,
+                        DISTINCT_CONCAT(@i.$data_center, data_center) AS data_center,
+                        DISTINCT_CONCAT(@i.$device_group, device_group) AS device_group,
+                        @i.$sled_ip AS sled_ip,
+                        @i.$address_type AS address_type,
+                        @i.$direction AS direction,
+                        @i.$vsys_id AS vsys_id,
+                        @i.$t_vsys_id AS t_vsys_id,
+                        flags AS flags,
+                        @i.$flags_identify_info AS flags_identify_info,
+                        
+                        @i.$c2s_ttl AS c2s_ttl,
+                        @i.$s2c_ttl AS s2c_ttl,
+                       
+                        @i.$client_ip AS client_ip,
+                        @i.$client_port AS client_port,
+                        @i.$client_os_desc AS client_os_desc,
+                        @i.$client_geolocation AS client_geolocation,
+                        @i.$client_country AS client_country,
+                        @i.$client_super_administrative_area AS client_super_administrative_area,
+                        @i.$client_administrative_area AS client_administrative_area,
+                        @i.$client_sub_administrative_area AS client_sub_administrative_area,
+                        @i.$client_asn AS client_asn,
+                        
+                        @i.$server_ip AS server_ip,
+                        @i.$server_port AS server_port,
+                        @i.$server_os_desc AS server_os_desc,
+                        @i.$server_geolocation AS server_geolocation,
+                        @i.$server_country AS server_country,
+                        @i.$server_super_administrative_area AS server_super_administrative_area,
+                        @i.$server_administrative_area AS server_administrative_area,
+                        @i.$server_sub_administrative_area AS server_sub_administrative_area,
+                        @i.$server_asn AS server_asn,
+                        
+                        @i.$ip_protocol AS ip_protocol,
+                        
+                        @i.$sent_pkts + sent_pkts AS sent_pkts,
+                        @i.$received_pkts + received_pkts AS received_pkts,
+                        @i.$sent_bytes + sent_bytes AS sent_bytes,
+                        @i.$received_bytes + received_bytes AS received_bytes,
+                        
+                        withColumns(sip_call_id to sip_bye_reason), 
+                      
+                        @i.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
+                        @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
+                        @i.$rtp_pcap_path AS rtp_pcap_path,
+                        ( @i.$client_ip == sip_originator_sdp_connect_ip).?(1, (@i.$client_ip == sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
+              - TRUNCATE rtp
+          # TODO USE EVENT
+          - SCHEDULING USING PROCESS TIME FOR NOW + 6 * 60 * 1000
+      - on: rtp-records
+        key-by: vsys_id, SORT_ADDRESS( client_ip, client_port, server_ip, server_port ) AS address
+        process:
+          - APPEND rtp FROM withColumns(recv_time to rtp_originator_dir)
+          - if: '@sip.isNotNull'
+            then:
+              - |-
+                FLAT OUTPUT ok FOR i IN rtp FROM
+                                @i.$recv_time AS recv_time,
+                                @i.$log_id AS log_id,
+                                'VoIP' AS decoded_as,
+                                @i.$session_id AS session_id,
+                                @i.$start_timestamp_ms AS start_timestamp_ms,
+                                @i.$end_timestamp_ms AS end_timestamp_ms,
+                                @i.$duration_ms AS duration_ms,
+                                @i.$tcp_handshake_latency_ms AS tcp_handshake_latency_ms,
+                                @i.$ingestion_time AS ingestion_time,
+                                @i.$processing_time AS processing_time,
+                                @i.$insert_time AS insert_time,
+                                @i.$device_id AS device_id,
+                                @i.$out_link_id AS out_link_id,
+                                @i.$in_link_id AS in_link_id,
+                                @i.$device_tag AS device_tag,
+                                @i.$data_center AS data_center,
+                                @i.$device_group AS device_group,
+                                @i.$sled_ip AS sled_ip,
+                                @i.$address_type AS address_type,
+                                @i.$direction AS direction,
+                                @i.$vsys_id AS vsys_id,
+                                @i.$t_vsys_id AS t_vsys_id,
+                                @sip.$flags AS flags,
+                                @sip.$flags_identify_info AS flags_identify_info,
+                                
+                                @i.$c2s_ttl AS c2s_ttl,
+                                @i.$s2c_ttl AS s2c_ttl,
+                                
+                                @i.$client_ip AS client_ip,
+                                @i.$client_port AS client_port,
+                                @i.$client_os_desc AS client_os_desc,
+                                @i.$client_geolocation AS client_geolocation,
+                                @i.$client_country AS client_country,
+                                @i.$client_super_administrative_area AS client_super_administrative_area,
+                                @i.$client_administrative_area AS client_administrative_area,
+                                @i.$client_sub_administrative_area AS client_sub_administrative_area,
+                                @i.$client_asn AS client_asn,
+                                
+                                @i.$server_ip AS server_ip,
+                                @i.$server_port AS server_port,
+                                @i.$server_os_desc AS server_os_desc,
+                                @i.$server_geolocation AS server_geolocation,
+                                @i.$server_country AS server_country,
+                                @i.$server_super_administrative_area AS server_super_administrative_area,
+                                @i.$server_administrative_area AS server_administrative_area,
+                                @i.$server_sub_administrative_area AS server_sub_administrative_area,
+                                @i.$server_asn AS server_asn,
+                                
+                                @i.$ip_protocol AS ip_protocol,
+                                
+                                @i.$sent_pkts + sent_pkts AS sent_pkts,
+                                @i.$received_pkts + received_pkts AS received_pkts,
+                                @i.$sent_bytes + sent_bytes AS sent_bytes,
+                                @i.$received_bytes + received_bytes AS received_bytes,
+                                
+                                @sip.$sip_call_id AS sip_call_id,
+                                @sip.$sip_originator_description AS sip_originator_description,
+                                @sip.$sip_responder_description AS sip_responder_description,
+                                @sip.$sip_user_agent AS sip_user_agent,
+                                @sip.$sip_server AS sip_server,
+                                @sip.$sip_originator_sdp_connect_ip AS sip_originator_sdp_connect_ip,
+                                @sip.$sip_originator_sdp_media_port AS sip_originator_sdp_media_port,
+                                @sip.$sip_originator_sdp_media_type AS sip_originator_sdp_media_type,
+                                @sip.$sip_originator_sdp_content AS sip_originator_sdp_content,
+                                @sip.$sip_responder_sdp_connect_ip AS sip_responder_sdp_connect_ip,
+                                @sip.$sip_responder_sdp_media_port AS sip_responder_sdp_media_port,
+                                @sip.$sip_responder_sdp_media_type AS sip_responder_sdp_media_type,
+                                @sip.$sip_responder_sdp_content AS sip_responder_sdp_content,
+                                @sip.$sip_duration_s AS sip_duration_s,
+                                @sip.$sip_bye AS sip_bye,
+                                @sip.$sip_bye_reason AS sip_bye_reason,
+                
+                                @i.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
+                                @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
+                                @i.$rtp_pcap_path AS rtp_pcap_path,
+                                ( @i.$client_ip == @sip.$sip_originator_sdp_connect_ip).?(1, (@i.$client_ip == @sip.$sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
+          - SCHEDULING USING PROCESS TIME FOR NOW + 6 * 60 * 1000
+    schedule:
+      - if: '@rtp.isNotNull && @rtp.cardinality > 0'
+        then:
+          - |- 
+            FLAT OUTPUT fail FOR i IN rtp FROM @i.$recv_time AS recv_time,
+                            @i.$log_id AS log_id,
+                            @i.$decoded_as AS decoded_as,
+                            @i.$session_id AS session_id,
+                            @i.$start_timestamp_ms AS start_timestamp_ms,
+                            @i.$start_timestamp AS start_timestamp,
+                            @i.$end_timestamp_ms AS end_timestamp_ms,
+                            @i.$duration_ms AS duration_ms,
+                            @i.$tcp_handshake_latency_ms AS tcp_handshake_latency_ms,
+                            @i.$ingestion_time AS ingestion_time,
+                            @i.$processing_time AS processing_time,
+                            @i.$insert_time AS insert_time,
+                            @i.$device_id AS device_id,
+                            @i.$out_link_id AS out_link_id,
+                            @i.$in_link_id AS in_link_id,
+                            @i.$device_tag AS device_tag,
+                            @i.$data_center AS data_center,
+                            @i.$device_group AS device_group,
+                            @i.$sled_ip AS sled_ip,
+                            @i.$address_type AS address_type,
+                            @i.$direction AS direction,
+                            @i.$vsys_id AS vsys_id,
+                            @i.$t_vsys_id AS t_vsys_id,
+                            @i.$flags AS flags,
+                            @i.$flags_identify_info AS flags_identify_info,
+                            @i.$c2s_ttl AS c2s_ttl,
+                            @i.$s2c_ttl AS s2c_ttl,
+                            @i.$security_rule_list AS security_rule_list,
+                            @i.$security_action AS security_action,
+                            @i.$monitor_rule_list AS monitor_rule_list,
+                            @i.$shaping_rule_list AS shaping_rule_list,
+                            @i.$proxy_rule_list AS proxy_rule_list,
+                            @i.$statistics_rule_list AS statistics_rule_list,
+                            @i.$sc_rule_list AS sc_rule_list,
+                            @i.$sc_rsp_raw AS sc_rsp_raw,
+                            @i.$sc_rsp_decrypted AS sc_rsp_decrypted,
+                            @i.$proxy_action AS proxy_action,
+                            @i.$proxy_pinning_status AS proxy_pinning_status,
+                            @i.$proxy_intercept_status AS proxy_intercept_status,
+                            @i.$proxy_passthrough_reason AS proxy_passthrough_reason,
+                            @i.$proxy_client_side_latency_ms AS proxy_client_side_latency_ms,
+                            @i.$proxy_server_side_latency_ms AS proxy_server_side_latency_ms,
+                            @i.$proxy_client_side_version AS proxy_client_side_version,
+                            @i.$proxy_server_side_version AS proxy_server_side_version,
+                            @i.$proxy_cert_verify AS proxy_cert_verify,
+                            @i.$proxy_intercept_error AS proxy_intercept_error,
+                            @i.$monitor_mirrored_pkts AS monitor_mirrored_pkts,
+                            @i.$monitor_mirrored_bytes AS monitor_mirrored_bytes,
+                            @i.$client_ip AS client_ip,
+                            @i.$client_port AS client_port,
+                            @i.$client_os_desc AS client_os_desc,
+                            @i.$client_geolocation AS client_geolocation,
+                            @i.$client_country AS client_country,
+                            @i.$client_super_administrative_area AS client_super_administrative_area,
+                            @i.$client_administrative_area AS client_administrative_area,
+                            @i.$client_sub_administrative_area AS client_sub_administrative_area,
+                            @i.$client_asn AS client_asn,
+                            @i.$subscriber_id AS subscriber_id,
+                            @i.$imei AS imei,
+                            @i.$imsi AS imsi,
+                            @i.$phone_number AS phone_number,
+                            @i.$apn AS apn,
+                            @i.$server_ip AS server_ip,
+                            @i.$server_port AS server_port,
+                            @i.$server_os_desc AS server_os_desc,
+                            @i.$server_geolocation AS server_geolocation,
+                            @i.$server_country AS server_country,
+                            @i.$server_super_administrative_area AS server_super_administrative_area,
+                            @i.$server_administrative_area AS server_administrative_area,
+                            @i.$server_sub_administrative_area AS server_sub_administrative_area,
+                            @i.$server_asn AS server_asn,
+                            @i.$server_fqdn AS server_fqdn,
+                            @i.$server_domain AS server_domain,
+                            @i.$fqdn_category_list AS fqdn_category_list,
+                            @i.$app_transition AS app_transition,
+                            @i.$app AS app,
+                            @i.$app_category AS app_category,
+                            @i.$app_debug_info AS app_debug_info,
+                            @i.$app_content AS app_content,
+                            @i.$app_extra_info AS app_extra_info,
+                            @i.$ip_protocol AS ip_protocol,
+                            @i.$decoded_path AS decoded_path,
+                            @i.$sent_pkts AS sent_pkts,
+                            @i.$received_pkts AS received_pkts,
+                            @i.$sent_bytes AS sent_bytes,
+                            @i.$received_bytes AS received_bytes,
+                            @i.$tcp_c2s_ip_fragments AS tcp_c2s_ip_fragments,
+                            @i.$tcp_s2c_ip_fragments AS tcp_s2c_ip_fragments,
+                            @i.$tcp_c2s_lost_bytes AS tcp_c2s_lost_bytes,
+                            @i.$tcp_s2c_lost_bytes AS tcp_s2c_lost_bytes,
+                            @i.$tcp_c2s_o3_pkts AS tcp_c2s_o3_pkts,
+                            @i.$tcp_s2c_o3_pkts AS tcp_s2c_o3_pkts,
+                            @i.$tcp_c2s_rtx_pkts AS tcp_c2s_rtx_pkts,
+                            @i.$tcp_s2c_rtx_pkts AS tcp_s2c_rtx_pkts,
+                            @i.$tcp_c2s_rtx_bytes AS tcp_c2s_rtx_bytes,
+                            @i.$tcp_s2c_rtx_bytes AS tcp_s2c_rtx_bytes,
+                            @i.$tcp_rtt_ms AS tcp_rtt_ms,
+                            @i.$tcp_client_isn AS tcp_client_isn,
+                            @i.$tcp_server_isn AS tcp_server_isn,
+                            @i.$packet_capture_file AS packet_capture_file,
+                            @i.$in_src_mac AS in_src_mac,
+                            @i.$out_src_mac AS out_src_mac,
+                            @i.$in_dest_mac AS in_dest_mac,
+                            @i.$out_dest_mac AS out_dest_mac,
+                            @i.$encapsulation AS encapsulation,
+                            @i.$dup_traffic_flag AS dup_traffic_flag,
+                            @i.$tunnel_id_list AS tunnel_id_list,
+                            @i.$tunnel_endpoint_a_desc AS tunnel_endpoint_a_desc,
+                            @i.$tunnel_endpoint_b_desc AS tunnel_endpoint_b_desc,
+                            @i.$sip_call_id AS sip_call_id,
+                            @i.$sip_originator_description AS sip_originator_description,
+                            @i.$sip_responder_description AS sip_responder_description,
+                            @i.$sip_user_agent AS sip_user_agent,
+                            @i.$sip_server AS sip_server,
+                            @i.$sip_originator_sdp_connect_ip AS sip_originator_sdp_connect_ip,
+                            @i.$sip_originator_sdp_media_port AS sip_originator_sdp_media_port,
+                            @i.$sip_originator_sdp_media_type AS sip_originator_sdp_media_type,
+                            @i.$sip_originator_sdp_content AS sip_originator_sdp_content,
+                            @i.$sip_responder_sdp_connect_ip AS sip_responder_sdp_connect_ip,
+                            @i.$sip_responder_sdp_media_port AS sip_responder_sdp_media_port,
+                            @i.$sip_responder_sdp_media_type AS sip_responder_sdp_media_type,
+                            @i.$sip_responder_sdp_content AS sip_responder_sdp_content,
+                            @i.$sip_duration_s AS sip_duration_s,
+                            @i.$sip_bye AS sip_bye,
+                            @i.$sip_bye_reason AS sip_bye_reason,
+                            @i.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
+                            @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
+                            @i.$rtp_pcap_path AS rtp_pcap_path,
+                            @i.$rtp_originator_dir AS rtp_originator_dir
+          - TRUNCATE rtp
+      - if: '@sip.isNotNull'
+        then:
+          - |-
+            OUTPUT fail FROM @sip.$recv_time AS recv_time,
+                        @sip.$log_id AS log_id,
+                        @sip.$decoded_as AS decoded_as,
+                        @sip.$session_id AS session_id,
+                        @sip.$start_timestamp_ms AS start_timestamp_ms,
+                        @sip.$start_timestamp AS start_timestamp,
+                        @sip.$end_timestamp_ms AS end_timestamp_ms,
+                        @sip.$duration_ms AS duration_ms,
+                        @sip.$tcp_handshake_latency_ms AS tcp_handshake_latency_ms,
+                        @sip.$ingestion_time AS ingestion_time,
+                        @sip.$processing_time AS processing_time,
+                        @sip.$insert_time AS insert_time,
+                        @sip.$device_id AS device_id,
+                        @sip.$out_link_id AS out_link_id,
+                        @sip.$in_link_id AS in_link_id,
+                        @sip.$device_tag AS device_tag,
+                        @sip.$data_center AS data_center,
+                        @sip.$device_group AS device_group,
+                        @sip.$sled_ip AS sled_ip,
+                        @sip.$address_type AS address_type,
+                        @sip.$direction AS direction,
+                        @sip.$vsys_id AS vsys_id,
+                        @sip.$t_vsys_id AS t_vsys_id,
+                        @sip.$flags AS flags,
+                        @sip.$flags_identify_info AS flags_identify_info,
+                        @sip.$c2s_ttl AS c2s_ttl,
+                        @sip.$s2c_ttl AS s2c_ttl,
+                        @sip.$security_rule_list AS security_rule_list,
+                        @sip.$security_action AS security_action,
+                        @sip.$monitor_rule_list AS monitor_rule_list,
+                        @sip.$shaping_rule_list AS shaping_rule_list,
+                        @sip.$proxy_rule_list AS proxy_rule_list,
+                        @sip.$statistics_rule_list AS statistics_rule_list,
+                        @sip.$sc_rule_list AS sc_rule_list,
+                        @sip.$sc_rsp_raw AS sc_rsp_raw,
+                        @sip.$sc_rsp_decrypted AS sc_rsp_decrypted,
+                        @sip.$proxy_action AS proxy_action,
+                        @sip.$proxy_pinning_status AS proxy_pinning_status,
+                        @sip.$proxy_intercept_status AS proxy_intercept_status,
+                        @sip.$proxy_passthrough_reason AS proxy_passthrough_reason,
+                        @sip.$proxy_client_side_latency_ms AS proxy_client_side_latency_ms,
+                        @sip.$proxy_server_side_latency_ms AS proxy_server_side_latency_ms,
+                        @sip.$proxy_client_side_version AS proxy_client_side_version,
+                        @sip.$proxy_server_side_version AS proxy_server_side_version,
+                        @sip.$proxy_cert_verify AS proxy_cert_verify,
+                        @sip.$proxy_intercept_error AS proxy_intercept_error,
+                        @sip.$monitor_mirrored_pkts AS monitor_mirrored_pkts,
+                        @sip.$monitor_mirrored_bytes AS monitor_mirrored_bytes,
+                        @sip.$client_ip AS client_ip,
+                        @sip.$client_port AS client_port,
+                        @sip.$client_os_desc AS client_os_desc,
+                        @sip.$client_geolocation AS client_geolocation,
+                        @sip.$client_country AS client_country,
+                        @sip.$client_super_administrative_area AS client_super_administrative_area,
+                        @sip.$client_administrative_area AS client_administrative_area,
+                        @sip.$client_sub_administrative_area AS client_sub_administrative_area,
+                        @sip.$client_asn AS client_asn,
+                        @sip.$subscriber_id AS subscriber_id,
+                        @sip.$imei AS imei,
+                        @sip.$imsi AS imsi,
+                        @sip.$phone_number AS phone_number,
+                        @sip.$apn AS apn,
+                        @sip.$server_ip AS server_ip,
+                        @sip.$server_port AS server_port,
+                        @sip.$server_os_desc AS server_os_desc,
+                        @sip.$server_geolocation AS server_geolocation,
+                        @sip.$server_country AS server_country,
+                        @sip.$server_super_administrative_area AS server_super_administrative_area,
+                        @sip.$server_administrative_area AS server_administrative_area,
+                        @sip.$server_sub_administrative_area AS server_sub_administrative_area,
+                        @sip.$server_asn AS server_asn,
+                        @sip.$server_fqdn AS server_fqdn,
+                        @sip.$server_domain AS server_domain,
+                        @sip.$fqdn_category_list AS fqdn_category_list,
+                        @sip.$app_transition AS app_transition,
+                        @sip.$app AS app,
+                        @sip.$app_category AS app_category,
+                        @sip.$app_debug_info AS app_debug_info,
+                        @sip.$app_content AS app_content,
+                        @sip.$app_extra_info AS app_extra_info,
+                        @sip.$ip_protocol AS ip_protocol,
+                        @sip.$decoded_path AS decoded_path,
+                        @sip.$sent_pkts AS sent_pkts,
+                        @sip.$received_pkts AS received_pkts,
+                        @sip.$sent_bytes AS sent_bytes,
+                        @sip.$received_bytes AS received_bytes,
+                        @sip.$tcp_c2s_ip_fragments AS tcp_c2s_ip_fragments,
+                        @sip.$tcp_s2c_ip_fragments AS tcp_s2c_ip_fragments,
+                        @sip.$tcp_c2s_lost_bytes AS tcp_c2s_lost_bytes,
+                        @sip.$tcp_s2c_lost_bytes AS tcp_s2c_lost_bytes,
+                        @sip.$tcp_c2s_o3_pkts AS tcp_c2s_o3_pkts,
+                        @sip.$tcp_s2c_o3_pkts AS tcp_s2c_o3_pkts,
+                        @sip.$tcp_c2s_rtx_pkts AS tcp_c2s_rtx_pkts,
+                        @sip.$tcp_s2c_rtx_pkts AS tcp_s2c_rtx_pkts,
+                        @sip.$tcp_c2s_rtx_bytes AS tcp_c2s_rtx_bytes,
+                        @sip.$tcp_s2c_rtx_bytes AS tcp_s2c_rtx_bytes,
+                        @sip.$tcp_rtt_ms AS tcp_rtt_ms,
+                        @sip.$tcp_client_isn AS tcp_client_isn,
+                        @sip.$tcp_server_isn AS tcp_server_isn,
+                        @sip.$packet_capture_file AS packet_capture_file,
+                        @sip.$in_src_mac AS in_src_mac,
+                        @sip.$out_src_mac AS out_src_mac,
+                        @sip.$in_dest_mac AS in_dest_mac,
+                        @sip.$out_dest_mac AS out_dest_mac,
+                        @sip.$encapsulation AS encapsulation,
+                        @sip.$dup_traffic_flag AS dup_traffic_flag,
+                        @sip.$tunnel_id_list AS tunnel_id_list,
+                        @sip.$tunnel_endpoint_a_desc AS tunnel_endpoint_a_desc,
+                        @sip.$tunnel_endpoint_b_desc AS tunnel_endpoint_b_desc,
+                        @sip.$sip_call_id AS sip_call_id,
+                        @sip.$sip_originator_description AS sip_originator_description,
+                        @sip.$sip_responder_description AS sip_responder_description,
+                        @sip.$sip_user_agent AS sip_user_agent,
+                        @sip.$sip_server AS sip_server,
+                        @sip.$sip_originator_sdp_connect_ip AS sip_originator_sdp_connect_ip,
+                        @sip.$sip_originator_sdp_media_port AS sip_originator_sdp_media_port,
+                        @sip.$sip_originator_sdp_media_type AS sip_originator_sdp_media_type,
+                        @sip.$sip_originator_sdp_content AS sip_originator_sdp_content,
+                        @sip.$sip_responder_sdp_connect_ip AS sip_responder_sdp_connect_ip,
+                        @sip.$sip_responder_sdp_media_port AS sip_responder_sdp_media_port,
+                        @sip.$sip_responder_sdp_media_type AS sip_responder_sdp_media_type,
+                        @sip.$sip_responder_sdp_content AS sip_responder_sdp_content,
+                        @sip.$sip_duration_s AS sip_duration_s,
+                        @sip.$sip_bye AS sip_bye,
+                        @sip.$sip_bye_reason AS sip_bye_reason,
+                        @sip.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
+                        @sip.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
+                        @sip.$rtp_pcap_path AS rtp_pcap_path,
+                        @sip.$rtp_originator_dir AS rtp_originator_dir
+          - TRUNCATE sip
+  - name: cannot-fusion-records
+    category: UNION
+    on:
+      - sip-double-way-records.fail # 没有双向关联成功的 SIP 单向流日志
+      - voip-fusion.fail # 没有关联上 SIP 的 RTP 日志  &  没关联上 RTP 的 DOUBLE SIP 日志
+  - name: errors-records
+    category: UNION
+    on:
+      - error1-records
+      - error2-records
+      - error3-records
+      - error4-records
