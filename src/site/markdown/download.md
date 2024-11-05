@@ -2,12 +2,19 @@
 
 ### ${project.version}
 
+- [TSG-23174](https://jira.geedge.net/browse/TSG-23174) 测试完成，升级为稳定版本。
+
+| Easy Stream | UDF Jar                                                      | Job                                                          |
+|-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ${easy.stream.version}         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.sha1) ) |
+
+
 - 修复 sip 双向关联模块的数据丢失问题。
 - [GAL-684](https://jira.geedge.net/browse/GAL-684) 调整融合后的字段映射，增加更加详细的监控指标。
 
 | Easy Stream | UDF Jar                                                      | Job                                                          |
 |-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ${easy.stream.version}         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.sha1) ) |
+| ${easy.stream.version}         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.tar.gz.sha1) ) |
 
 ### 2.0-rc8
 
