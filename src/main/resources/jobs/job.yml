@@ -825,6 +825,12 @@ pipeline:
   - name: voip-fusion
     category: CORRELATE
     cache:
+      - name: sip_status
+        type: VALUE
+        ttl: 10 minute
+        schema:
+          - name: be_used
+            data-type: BOOLEAN
       - name: sip
         type: VALUE
         ttl: 7 minute
@@ -1575,6 +1581,7 @@ pipeline:
                         @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
                         @i.$rtp_pcap_path AS rtp_pcap_path,
                         ( @i.$client_ip == sip_originator_sdp_connect_ip).?(1, (@i.$client_ip == sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
+              - SET sip_status FROM true AS be_used
               - TRUNCATE rtp
           # TODO USE EVENT
           - SCHEDULING USING PROCESS TIME FOR NOW + 6 * 60 * 1000
@@ -1662,6 +1669,8 @@ pipeline:
                                 @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
                                 @i.$rtp_pcap_path AS rtp_pcap_path,
                                 ( @i.$client_ip == @sip.$sip_originator_sdp_connect_ip).?(1, (@i.$client_ip == @sip.$sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
+              - SET sip_status FROM true AS be_used
+              - TRUNCATE rtp
           - SCHEDULING USING PROCESS TIME FOR NOW + 6 * 60 * 1000
     schedule:
       - if: '@rtp.isNotNull && @rtp.cardinality > 0'
@@ -1797,7 +1806,7 @@ pipeline:
                             @i.$rtp_pcap_path AS rtp_pcap_path,
                             @i.$rtp_originator_dir AS rtp_originator_dir
           - TRUNCATE rtp
-      - if: '@sip.isNotNull'
+      - if: '@sip.isNotNull && ( @sip_status.isNull || !@sip_status.$be_used )'
         then:
           - |-
             OUTPUT fail FROM @sip.$recv_time AS recv_time,
