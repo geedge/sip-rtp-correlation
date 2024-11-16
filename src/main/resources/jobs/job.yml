@@ -830,7 +830,7 @@ pipeline:
         ttl: 10 minute
         schema:
           - name: be_used
-            data-type: BOOLEAN
+            data-type: BOOLEAN NOT NULL
       - name: sip
         type: VALUE
         ttl: 7 minute
@@ -1386,7 +1386,7 @@ pipeline:
           - if: '@sip.isNotNull'
             then:
               - |-
-                OUTPUT fail FROM @sip.$recv_time AS recv_time,
+                OUTPUT fail-sip-because-duplicate FROM @sip.$recv_time AS recv_time,
                             @sip.$log_id AS log_id,
                             @sip.$decoded_as AS decoded_as,
                             @sip.$session_id AS session_id,
@@ -1676,7 +1676,7 @@ pipeline:
       - if: '@rtp.isNotNull && @rtp.cardinality > 0'
         then:
           - |- 
-            FLAT OUTPUT fail FOR i IN rtp FROM @i.$recv_time AS recv_time,
+            FLAT OUTPUT fail-rtp FOR i IN rtp FROM @i.$recv_time AS recv_time,
                             @i.$log_id AS log_id,
                             @i.$decoded_as AS decoded_as,
                             @i.$session_id AS session_id,
@@ -1809,7 +1809,7 @@ pipeline:
       - if: '@sip.isNotNull && ( @sip_status.isNull || !@sip_status.$be_used )'
         then:
           - |-
-            OUTPUT fail FROM @sip.$recv_time AS recv_time,
+            OUTPUT fail-sip FROM @sip.$recv_time AS recv_time,
                         @sip.$log_id AS log_id,
                         @sip.$decoded_as AS decoded_as,
                         @sip.$session_id AS session_id,
@@ -1943,7 +1943,10 @@ pipeline:
     category: UNION
     on:
       - sip-double-way-records.fail # 没有双向关联成功的 SIP 单向流日志
-      - voip-fusion.fail # 没有关联上 SIP 的 RTP 日志  &  没关联上 RTP 的 DOUBLE SIP 日志
+      # 没有关联上 SIP 的 RTP 日志  &  没关联上 RTP 的 DOUBLE SIP 日志
+      - voip-fusion.fail-sip
+      - voip-fusion.fail-rtp
+      - voip-fusion.fail-sip-because-duplicate
   - name: errors-records
     category: UNION
     on:

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+flink run -t yarn-per-job -Djobmanager.memory.process.size=1024m -Dtaskmanager.memory.process.size=4G -Dtaskmanager.numberOfTaskSlots=1 -Dtaskmanager.memory.framework.off-heap.size=256m -Dtaskmanager.memory.jvm-metaspace.size=256m -Dtaskmanager.memory.network.max=256m -Dyarn.application.name=voip-fusion -Drest.flamegraph.enabled=true -p 1 -d -c com.geedgenetworks.flink.easy.core.Runner /home/tsg/olap/flink/topology/sip-rtp-correlation/sip-rtp-correlation-2.1.jar /home/tsg/olap/flink/topology/sip-rtp-correlation/job.yml
