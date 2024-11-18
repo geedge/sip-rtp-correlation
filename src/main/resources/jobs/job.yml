@@ -338,12 +338,14 @@ pipeline:
         where: NOT(IS_IP_ADDRESS(client_ip)) || NOT(IS_IP_ADDRESS(server_ip)) || client_port.isNull || client_port <= 0 || server_port.isNull || server_port <= 0
       # Invalid stream dir
       - name: error2-records
-        where: decoded_as == 'SIP' &&STREAM_DIR(flags) != 1 && STREAM_DIR(flags) != 2 && STREAM_DIR(flags) != 3
+        where: decoded_as == 'SIP' && STREAM_DIR(flags) != 1 && STREAM_DIR(flags) != 2 && STREAM_DIR(flags) != 3
       # Invalid: SIP one-way stream and has invalid network address
       - name: error3-records
         where: decoded_as == 'SIP' && ( NOT(HAS_IP_ADDRESS(sip_originator_sdp_connect_ip, sip_responder_sdp_connect_ip)) || sip_originator_sdp_media_port.isNull || sip_originator_sdp_media_port <= 0 || sip_responder_sdp_media_port.isNull && sip_responder_sdp_media_port <= 0 )
       - name: error4-records
         where: decoded_as == 'SIP' && STREAM_DIR(flags) == 3 && ( NOT( IS_IP_ADDRESS(sip_originator_sdp_connect_ip) ) || NOT( IS_IP_ADDRESS(sip_responder_sdp_connect_ip) ) )
+      - name: error5-records
+        where: decoded_as == 'SIP' && sip_call_id.isNull
 
       ### Notes: If internal IP address correlate is needed, please comment the following two items
   #      # Invalid: SIP one-way stream and internal network address
@@ -1570,10 +1572,10 @@ pipeline:
                         
                         @i.$ip_protocol AS ip_protocol,
                         
-                        @i.$sent_pkts + sent_pkts AS sent_pkts,
-                        @i.$received_pkts + received_pkts AS received_pkts,
-                        @i.$sent_bytes + sent_bytes AS sent_bytes,
-                        @i.$received_bytes + received_bytes AS received_bytes,
+                        @i.$sent_pkts AS sent_pkts,
+                        @i.$received_pkts AS received_pkts,
+                        @i.$sent_bytes AS sent_bytes,
+                        @i.$received_bytes AS received_bytes,
                         
                         withColumns(sip_call_id to sip_bye_reason), 
                       
@@ -1643,10 +1645,10 @@ pipeline:
                                 
                                 @i.$ip_protocol AS ip_protocol,
                                 
-                                @i.$sent_pkts + sent_pkts AS sent_pkts,
-                                @i.$received_pkts + received_pkts AS received_pkts,
-                                @i.$sent_bytes + sent_bytes AS sent_bytes,
-                                @i.$received_bytes + received_bytes AS received_bytes,
+                                @i.$sent_pkts AS sent_pkts,
+                                @i.$received_pkts AS received_pkts,
+                                @i.$sent_bytes AS sent_bytes,
+                                @i.$received_bytes AS received_bytes,
                                 
                                 @sip.$sip_call_id AS sip_call_id,
                                 @sip.$sip_originator_description AS sip_originator_description,
@@ -1954,3 +1956,4 @@ pipeline:
       - error2-records
       - error3-records
       - error4-records
+      - error5-records
