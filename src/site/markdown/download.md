@@ -2,12 +2,22 @@
 
 ### ${project.version}
 
+- 当 VoIP 融合成功时，RTP 将不再输出；同时如果 SIP 关联成功过 RTP 也将不再输出。
+- VpIP 中的字节数，包数使用 RTP 侧的数据指标，不再累加计算。
+- 将 SIP 五元组，RTP 四元组中所有带有空值的数据判定为异常数据不再参与关联过程。
+
+| Easy Stream | UDF Jar                                                      | Job                                                          |
+|-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ${easy.stream.version}         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.sha1) ) |
+
+### 2.1
+
 - [TSG-23174](https://jira.geedge.net/browse/TSG-23174) 测试完成，升级为稳定版本。
 - 重复数据不再进行去重操作，未关联的全部输出。
 
 | Easy Stream | UDF Jar                                                      | Job                                                          |
 |-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ${easy.stream.version}         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/${project.version}/${project.artifactId}-${project.version}.tar.gz.sha1) ) |
+| 1.3-rc2         | [JAR](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.1/sip-rtp-correlation-2.1.jar) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.1/sip-rtp-correlation-2.1.jar.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.1/sip-rtp-correlation-2.1.jar.sha1) ) | [YML](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.1/sip-rtp-correlation-2.1.tar.gz) ( [MD5](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.1/sip-rtp-correlation-2.1.tar.gz.md5) [SHA1](http://192.168.40.153:8081/content/repositories/platform-release/com/geedgenetworks/application/sip-rtp-correlation/2.1/sip-rtp-correlation-2.1.tar.gz.sha1) ) |
 
 ### 2.0-rc9
 
@@ -16,7 +26,7 @@
 
 | Easy Stream | UDF Jar                                                      | Job                                                          |
 |-------------| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ${easy.stream.version}         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.tar.gz.sha1) ) |
+| 1.3-rc1         | [JAR](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.jar) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.jar.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.jar.sha1) ) | [YML](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.tar.gz) ( [MD5](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.tar.gz.md5) [SHA1](${project.distributionManagement.repository.url}/com/geedgenetworks/application/sip-rtp-correlation/2.0-rc9/${project.artifactId}-2.0-rc9.tar.gz.sha1) ) |
 
 ### 2.0-rc8
 
