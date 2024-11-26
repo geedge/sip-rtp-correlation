@@ -77,24 +77,24 @@ source:
       - name: s2c_ttl
         data-type: INT
       ## Treatment
-      - name: security_rule_list
-        data-type: ARRAY<BIGINT>
+      - name: security_rule_uuid_list
+        data-type: ARRAY<STRING>
       - name: security_action
         data-type: STRING
-      - name: monitor_rule_list
-        data-type: ARRAY<BIGINT>
-      - name: shaping_rule_list
-        data-type: ARRAY<BIGINT>
-      - name: proxy_rule_list
-        data-type: ARRAY<BIGINT>
-      - name: statistics_rule_list
-        data-type: ARRAY<BIGINT>
-      - name: sc_rule_list
-        data-type: ARRAY<BIGINT>
-      - name: sc_rsp_raw
-        data-type: ARRAY<BIGINT>
-      - name: sc_rsp_decrypted
-        data-type: ARRAY<BIGINT>
+      - name: monitor_rule_uuid_list
+        data-type: ARRAY<STRING>
+      - name: shaping_rule_uuid_list
+        data-type: ARRAY<STRING>
+      - name: proxy_rule_uuid_list
+        data-type: ARRAY<STRING>
+      - name: statistics_rule_uuid_list
+        data-type: ARRAY<STRING>
+      - name: sc_rule_uuid_list
+        data-type: ARRAY<STRING>
+      - name: sc_rsp_raw_uuid_list
+        data-type: ARRAY<STRING>
+      - name: sc_rsp_decrypted_uuid_list
+        data-type: ARRAY<STRING>
       - name: proxy_action
         data-type: STRING
       - name: proxy_pinning_status
@@ -103,13 +103,13 @@ source:
         data-type: INT
       - name: proxy_passthrough_reason
         data-type: STRING
-      - name: proxy_client_side_latency_ms
+      - name: proxy_source_side_latency_ms
         data-type: INT
-      - name: proxy_server_side_latency_ms
+      - name: proxy_destination_side_latency_ms
         data-type: INT
-      - name: proxy_client_side_version
+      - name: proxy_source_side_version
         data-type: STRING
-      - name: proxy_server_side_version
+      - name: proxy_destination_side_version
         data-type: STRING
       - name: proxy_cert_verify
         data-type: INT
@@ -120,25 +120,19 @@ source:
       - name: monitor_mirrored_bytes
         data-type: INT
       ## Source
-      - name: client_ip
+      - name: source_ip
         data-type: STRING
-      - name: client_port
+      - name: source_port
         data-type: INT
-      - name: client_os_desc
+      - name: source_os_desc
         data-type: STRING
-      - name: client_geolocation
+      - name: source_country
         data-type: STRING
-      - name: client_country
-        data-type: STRING
-      - name: client_super_administrative_area
-        data-type: STRING
-      - name: client_administrative_area
-        data-type: STRING
-      - name: client_sub_administrative_area
-        data-type: STRING
-      - name: client_asn
+      - name: source_asn
         data-type: BIGINT
       - name: subscriber_id
+        data-type: STRING
+      - name: subscriber_id_hmac
         data-type: STRING
       - name: imei
         data-type: STRING
@@ -146,33 +140,29 @@ source:
         data-type: STRING
       - name: phone_number
         data-type: STRING
+      - name: phone_number_hmac
+        data-type: STRING
       - name: apn
         data-type: STRING
+      - name: mobile_identify
+        data-type: STRING
       ## Destination
-      - name: server_ip
+      - name: destination_ip
         data-type: STRING
-      - name: server_port
+      - name: destination_port
         data-type: INT
-      - name: server_os_desc
+      - name: destination_os_desc
         data-type: STRING
-      - name: server_geolocation
+      - name: destination_country
         data-type: STRING
-      - name: server_country
-        data-type: STRING
-      - name: server_super_administrative_area
-        data-type: STRING
-      - name: server_administrative_area
-        data-type: STRING
-      - name: server_sub_administrative_area
-        data-type: STRING
-      - name: server_asn
+      - name: destination_asn
         data-type: BIGINT
-      - name: server_fqdn
+      - name: destination_fqdn
         data-type: STRING
-      - name: server_domain
+      - name: destination_domain
         data-type: STRING
-      - name: fqdn_category_list
-        data-type: ARRAY<INT>
+      - name: destination_fqdn_tags
+        data-type: ARRAY<STRING>
       ## Application
       - name: app_transition
         data-type: STRING
@@ -335,7 +325,7 @@ pipeline:
     splits:
       # Invalid ip or port
       - name: error1-records
-        where: NOT(IS_IP_ADDRESS(client_ip)) || NOT(IS_IP_ADDRESS(server_ip)) || client_port.isNull || client_port <= 0 || server_port.isNull || server_port <= 0
+        where: NOT(IS_IP_ADDRESS(source_ip)) || NOT(IS_IP_ADDRESS(destination_ip)) || source_port.isNull || source_port <= 0 || destination_port.isNull || destination_port <= 0
       # Invalid stream dir
       - name: error2-records
         where: decoded_as == 'SIP' && STREAM_DIR(flags) != 1 && STREAM_DIR(flags) != 2 && STREAM_DIR(flags) != 3
@@ -343,7 +333,7 @@ pipeline:
       - name: error3-records
         where: decoded_as == 'SIP' && ( NOT(HAS_IP_ADDRESS(sip_originator_sdp_connect_ip, sip_responder_sdp_connect_ip)) || sip_originator_sdp_media_port.isNull || sip_originator_sdp_media_port <= 0 || sip_responder_sdp_media_port.isNull && sip_responder_sdp_media_port <= 0 )
       - name: error4-records
-        where: decoded_as == 'SIP' && STREAM_DIR(flags) == 3 && ( NOT( IS_IP_ADDRESS(sip_originator_sdp_connect_ip) ) || NOT( IS_IP_ADDRESS(sip_responder_sdp_connect_ip) ) )
+        where: decoded_as == 'SIP' && STREAM_DIR(flags) == 3 && NOT( IS_IP_ADDRESS(sip_originator_sdp_connect_ip) ) && NOT( IS_IP_ADDRESS(sip_responder_sdp_connect_ip) )
       - name: error5-records
         where: decoded_as == 'SIP' && sip_call_id.isNull
 
@@ -426,24 +416,24 @@ pipeline:
           - name: s2c_ttl
             data-type: INT
           ## Treatment
-          - name: security_rule_list
-            data-type: ARRAY<BIGINT>
+          - name: security_rule_uuid_list
+            data-type: ARRAY<STRING>
           - name: security_action
             data-type: STRING
-          - name: monitor_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: shaping_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: proxy_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: statistics_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: sc_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: sc_rsp_raw
-            data-type: ARRAY<BIGINT>
-          - name: sc_rsp_decrypted
-            data-type: ARRAY<BIGINT>
+          - name: monitor_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: shaping_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: proxy_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: statistics_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: sc_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: sc_rsp_raw_uuid_list
+            data-type: ARRAY<STRING>
+          - name: sc_rsp_decrypted_uuid_list
+            data-type: ARRAY<STRING>
           - name: proxy_action
             data-type: STRING
           - name: proxy_pinning_status
@@ -452,13 +442,13 @@ pipeline:
             data-type: INT
           - name: proxy_passthrough_reason
             data-type: STRING
-          - name: proxy_client_side_latency_ms
+          - name: proxy_source_side_latency_ms
             data-type: INT
-          - name: proxy_server_side_latency_ms
+          - name: proxy_destination_side_latency_ms
             data-type: INT
-          - name: proxy_client_side_version
+          - name: proxy_source_side_version
             data-type: STRING
-          - name: proxy_server_side_version
+          - name: proxy_destination_side_version
             data-type: STRING
           - name: proxy_cert_verify
             data-type: INT
@@ -469,25 +459,19 @@ pipeline:
           - name: monitor_mirrored_bytes
             data-type: INT
           ## Source
-          - name: client_ip
+          - name: source_ip
             data-type: STRING
-          - name: client_port
+          - name: source_port
             data-type: INT
-          - name: client_os_desc
+          - name: source_os_desc
             data-type: STRING
-          - name: client_geolocation
+          - name: source_country
             data-type: STRING
-          - name: client_country
-            data-type: STRING
-          - name: client_super_administrative_area
-            data-type: STRING
-          - name: client_administrative_area
-            data-type: STRING
-          - name: client_sub_administrative_area
-            data-type: STRING
-          - name: client_asn
+          - name: source_asn
             data-type: BIGINT
           - name: subscriber_id
+            data-type: STRING
+          - name: subscriber_id_hmac
             data-type: STRING
           - name: imei
             data-type: STRING
@@ -495,33 +479,29 @@ pipeline:
             data-type: STRING
           - name: phone_number
             data-type: STRING
+          - name: phone_number_hmac
+            data-type: STRING
           - name: apn
             data-type: STRING
+          - name: mobile_identify
+            data-type: STRING
           ## Destination
-          - name: server_ip
+          - name: destination_ip
             data-type: STRING
-          - name: server_port
+          - name: destination_port
             data-type: INT
-          - name: server_os_desc
+          - name: destination_os_desc
             data-type: STRING
-          - name: server_geolocation
+          - name: destination_country
             data-type: STRING
-          - name: server_country
-            data-type: STRING
-          - name: server_super_administrative_area
-            data-type: STRING
-          - name: server_administrative_area
-            data-type: STRING
-          - name: server_sub_administrative_area
-            data-type: STRING
-          - name: server_asn
+          - name: destination_asn
             data-type: BIGINT
-          - name: server_fqdn
+          - name: destination_fqdn
             data-type: STRING
-          - name: server_domain
+          - name: destination_domain
             data-type: STRING
-          - name: fqdn_category_list
-            data-type: ARRAY<INT>
+          - name: destination_fqdn_tags
+            data-type: ARRAY<STRING>
           ## Application
           - name: app_transition
             data-type: STRING
@@ -640,7 +620,7 @@ pipeline:
             data-type: INT
     where:
       - on: sip-records
-        key-by: vsys_id, sip_call_id, SORT_ADDRESS( client_ip, client_port, server_ip, server_port )
+        key-by: vsys_id, sip_call_id, SORT_ADDRESS( source_ip, source_port, destination_ip, destination_port )
         process:
           - if: STREAM_DIR(flags) != 3 && @v1.isNotNull && STREAM_DIR(@v1.$flags) != STREAM_DIR(flags)
             then:
@@ -721,53 +701,48 @@ pipeline:
                           @v1.$flags_identify_info AS flags_identify_info,
                           @v1.$c2s_ttl AS c2s_ttl,
                           @v1.$s2c_ttl AS s2c_ttl,
-                          @v1.$security_rule_list AS security_rule_list,
+                          @v1.$security_rule_uuid_list AS security_rule_uuid_list,
                           @v1.$security_action AS security_action,
-                          @v1.$monitor_rule_list AS monitor_rule_list,
-                          @v1.$shaping_rule_list AS shaping_rule_list,
-                          @v1.$proxy_rule_list AS proxy_rule_list,
-                          @v1.$statistics_rule_list AS statistics_rule_list,
-                          @v1.$sc_rule_list AS sc_rule_list,
-                          @v1.$sc_rsp_raw AS sc_rsp_raw,
-                          @v1.$sc_rsp_decrypted AS sc_rsp_decrypted,
+                          @v1.$monitor_rule_uuid_list AS monitor_rule_uuid_list,
+                          @v1.$shaping_rule_uuid_list AS shaping_rule_uuid_list,
+                          @v1.$proxy_rule_uuid_list AS proxy_rule_uuid_list,
+                          @v1.$statistics_rule_uuid_list AS statistics_rule_uuid_list,
+                          @v1.$sc_rule_uuid_list AS sc_rule_uuid_list,
+                          @v1.$sc_rsp_raw_uuid_list AS sc_rsp_raw_uuid_list,
+                          @v1.$sc_rsp_decrypted_uuid_list AS sc_rsp_decrypted_uuid_list,
                           @v1.$proxy_action AS proxy_action,
                           @v1.$proxy_pinning_status AS proxy_pinning_status,
                           @v1.$proxy_intercept_status AS proxy_intercept_status,
                           @v1.$proxy_passthrough_reason AS proxy_passthrough_reason,
-                          @v1.$proxy_client_side_latency_ms AS proxy_client_side_latency_ms,
-                          @v1.$proxy_server_side_latency_ms AS proxy_server_side_latency_ms,
-                          @v1.$proxy_client_side_version AS proxy_client_side_version,
-                          @v1.$proxy_server_side_version AS proxy_server_side_version,
+                          @v1.$proxy_source_side_latency_ms AS proxy_source_side_latency_ms,
+                          @v1.$proxy_destination_side_latency_ms AS proxy_destination_side_latency_ms,
+                          @v1.$proxy_source_side_version AS proxy_source_side_version,
+                          @v1.$proxy_destination_side_version AS proxy_destination_side_version,
                           @v1.$proxy_cert_verify AS proxy_cert_verify,
                           @v1.$proxy_intercept_error AS proxy_intercept_error,
                           @v1.$monitor_mirrored_pkts AS monitor_mirrored_pkts,
                           @v1.$monitor_mirrored_bytes AS monitor_mirrored_bytes,
-                          @v1.$client_ip AS client_ip,
-                          @v1.$client_port AS client_port,
-                          @v1.$client_os_desc AS client_os_desc,
-                          @v1.$client_geolocation AS client_geolocation,
-                          @v1.$client_country AS client_country,
-                          @v1.$client_super_administrative_area AS client_super_administrative_area,
-                          @v1.$client_administrative_area AS client_administrative_area,
-                          @v1.$client_sub_administrative_area AS client_sub_administrative_area,
-                          @v1.$client_asn AS client_asn,
+                          @v1.$source_ip AS source_ip,
+                          @v1.$source_port AS source_port,
+                          @v1.$source_os_desc AS source_os_desc,
+                          @v1.$source_country AS source_country,
+                          @v1.$source_asn AS source_asn,
                           @v1.$subscriber_id AS subscriber_id,
+                          @v1.$subscriber_id_hmac AS subscriber_id_hmac,
                           @v1.$imei AS imei,
                           @v1.$imsi AS imsi,
                           @v1.$phone_number AS phone_number,
+                          @v1.$phone_number_hmac AS phone_number_hmac,
                           @v1.$apn AS apn,
-                          @v1.$server_ip AS server_ip,
-                          @v1.$server_port AS server_port,
-                          @v1.$server_os_desc AS server_os_desc,
-                          @v1.$server_geolocation AS server_geolocation,
-                          @v1.$server_country AS server_country,
-                          @v1.$server_super_administrative_area AS server_super_administrative_area,
-                          @v1.$server_administrative_area AS server_administrative_area,
-                          @v1.$server_sub_administrative_area AS server_sub_administrative_area,
-                          @v1.$server_asn AS server_asn,
-                          @v1.$server_fqdn AS server_fqdn,
-                          @v1.$server_domain AS server_domain,
-                          @v1.$fqdn_category_list AS fqdn_category_list,
+                          @v1.$mobile_identify AS mobile_identify,
+                          @v1.$destination_ip AS destination_ip,
+                          @v1.$destination_port AS destination_port,
+                          @v1.$destination_os_desc AS destination_os_desc,
+                          @v1.$destination_country AS destination_country,
+                          @v1.$destination_asn AS destination_asn,
+                          @v1.$destination_fqdn AS destination_fqdn,
+                          @v1.$destination_domain AS destination_domain,
+                          @v1.$destination_fqdn_tags AS destination_fqdn_tags,
                           @v1.$app_transition AS app_transition,
                           @v1.$app AS app,
                           @v1.$app_category AS app_category,
@@ -894,24 +869,24 @@ pipeline:
           - name: s2c_ttl
             data-type: INT
           ## Treatment
-          - name: security_rule_list
-            data-type: ARRAY<BIGINT>
+          - name: security_rule_uuid_list
+            data-type: ARRAY<STRING>
           - name: security_action
             data-type: STRING
-          - name: monitor_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: shaping_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: proxy_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: statistics_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: sc_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: sc_rsp_raw
-            data-type: ARRAY<BIGINT>
-          - name: sc_rsp_decrypted
-            data-type: ARRAY<BIGINT>
+          - name: monitor_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: shaping_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: proxy_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: statistics_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: sc_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: sc_rsp_raw_uuid_list
+            data-type: ARRAY<STRING>
+          - name: sc_rsp_decrypted_uuid_list
+            data-type: ARRAY<STRING>
           - name: proxy_action
             data-type: STRING
           - name: proxy_pinning_status
@@ -920,13 +895,13 @@ pipeline:
             data-type: INT
           - name: proxy_passthrough_reason
             data-type: STRING
-          - name: proxy_client_side_latency_ms
+          - name: proxy_source_side_latency_ms
             data-type: INT
-          - name: proxy_server_side_latency_ms
+          - name: proxy_destination_side_latency_ms
             data-type: INT
-          - name: proxy_client_side_version
+          - name: proxy_source_side_version
             data-type: STRING
-          - name: proxy_server_side_version
+          - name: proxy_destination_side_version
             data-type: STRING
           - name: proxy_cert_verify
             data-type: INT
@@ -937,25 +912,19 @@ pipeline:
           - name: monitor_mirrored_bytes
             data-type: INT
           ## Source
-          - name: client_ip
+          - name: source_ip
             data-type: STRING
-          - name: client_port
+          - name: source_port
             data-type: INT
-          - name: client_os_desc
+          - name: source_os_desc
             data-type: STRING
-          - name: client_geolocation
+          - name: source_country
             data-type: STRING
-          - name: client_country
-            data-type: STRING
-          - name: client_super_administrative_area
-            data-type: STRING
-          - name: client_administrative_area
-            data-type: STRING
-          - name: client_sub_administrative_area
-            data-type: STRING
-          - name: client_asn
+          - name: source_asn
             data-type: BIGINT
           - name: subscriber_id
+            data-type: STRING
+          - name: subscriber_id_hmac
             data-type: STRING
           - name: imei
             data-type: STRING
@@ -963,33 +932,29 @@ pipeline:
             data-type: STRING
           - name: phone_number
             data-type: STRING
+          - name: phone_number_hmac
+            data-type: STRING
           - name: apn
             data-type: STRING
+          - name: mobile_identify
+            data-type: STRING
           ## Destination
-          - name: server_ip
+          - name: destination_ip
             data-type: STRING
-          - name: server_port
+          - name: destination_port
             data-type: INT
-          - name: server_os_desc
+          - name: destination_os_desc
             data-type: STRING
-          - name: server_geolocation
+          - name: destination_country
             data-type: STRING
-          - name: server_country
-            data-type: STRING
-          - name: server_super_administrative_area
-            data-type: STRING
-          - name: server_administrative_area
-            data-type: STRING
-          - name: server_sub_administrative_area
-            data-type: STRING
-          - name: server_asn
+          - name: destination_asn
             data-type: BIGINT
-          - name: server_fqdn
+          - name: destination_fqdn
             data-type: STRING
-          - name: server_domain
+          - name: destination_domain
             data-type: STRING
-          - name: fqdn_category_list
-            data-type: ARRAY<INT>
+          - name: destination_fqdn_tags
+            data-type: ARRAY<STRING>
           ## Application
           - name: app_transition
             data-type: STRING
@@ -1167,24 +1132,24 @@ pipeline:
           - name: s2c_ttl
             data-type: INT
           ## Treatment
-          - name: security_rule_list
-            data-type: ARRAY<BIGINT>
+          - name: security_rule_uuid_list
+            data-type: ARRAY<STRING>
           - name: security_action
             data-type: STRING
-          - name: monitor_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: shaping_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: proxy_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: statistics_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: sc_rule_list
-            data-type: ARRAY<BIGINT>
-          - name: sc_rsp_raw
-            data-type: ARRAY<BIGINT>
-          - name: sc_rsp_decrypted
-            data-type: ARRAY<BIGINT>
+          - name: monitor_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: shaping_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: proxy_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: statistics_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: sc_rule_uuid_list
+            data-type: ARRAY<STRING>
+          - name: sc_rsp_raw_uuid_list
+            data-type: ARRAY<STRING>
+          - name: sc_rsp_decrypted_uuid_list
+            data-type: ARRAY<STRING>
           - name: proxy_action
             data-type: STRING
           - name: proxy_pinning_status
@@ -1193,13 +1158,13 @@ pipeline:
             data-type: INT
           - name: proxy_passthrough_reason
             data-type: STRING
-          - name: proxy_client_side_latency_ms
+          - name: proxy_source_side_latency_ms
             data-type: INT
-          - name: proxy_server_side_latency_ms
+          - name: proxy_destination_side_latency_ms
             data-type: INT
-          - name: proxy_client_side_version
+          - name: proxy_source_side_version
             data-type: STRING
-          - name: proxy_server_side_version
+          - name: proxy_destination_side_version
             data-type: STRING
           - name: proxy_cert_verify
             data-type: INT
@@ -1210,25 +1175,19 @@ pipeline:
           - name: monitor_mirrored_bytes
             data-type: INT
           ## Source
-          - name: client_ip
+          - name: source_ip
             data-type: STRING
-          - name: client_port
+          - name: source_port
             data-type: INT
-          - name: client_os_desc
+          - name: source_os_desc
             data-type: STRING
-          - name: client_geolocation
+          - name: source_country
             data-type: STRING
-          - name: client_country
-            data-type: STRING
-          - name: client_super_administrative_area
-            data-type: STRING
-          - name: client_administrative_area
-            data-type: STRING
-          - name: client_sub_administrative_area
-            data-type: STRING
-          - name: client_asn
+          - name: source_asn
             data-type: BIGINT
           - name: subscriber_id
+            data-type: STRING
+          - name: subscriber_id_hmac
             data-type: STRING
           - name: imei
             data-type: STRING
@@ -1236,33 +1195,29 @@ pipeline:
             data-type: STRING
           - name: phone_number
             data-type: STRING
+          - name: phone_number_hmac
+            data-type: STRING
           - name: apn
             data-type: STRING
+          - name: mobile_identify
+            data-type: STRING
           ## Destination
-          - name: server_ip
+          - name: destination_ip
             data-type: STRING
-          - name: server_port
+          - name: destination_port
             data-type: INT
-          - name: server_os_desc
+          - name: destination_os_desc
             data-type: STRING
-          - name: server_geolocation
+          - name: destination_country
             data-type: STRING
-          - name: server_country
-            data-type: STRING
-          - name: server_super_administrative_area
-            data-type: STRING
-          - name: server_administrative_area
-            data-type: STRING
-          - name: server_sub_administrative_area
-            data-type: STRING
-          - name: server_asn
+          - name: destination_asn
             data-type: BIGINT
-          - name: server_fqdn
+          - name: destination_fqdn
             data-type: STRING
-          - name: server_domain
+          - name: destination_domain
             data-type: STRING
-          - name: fqdn_category_list
-            data-type: ARRAY<INT>
+          - name: destination_fqdn_tags
+            data-type: ARRAY<STRING>
           ## Application
           - name: app_transition
             data-type: STRING
@@ -1415,53 +1370,48 @@ pipeline:
                             @sip.$flags_identify_info AS flags_identify_info,
                             @sip.$c2s_ttl AS c2s_ttl,
                             @sip.$s2c_ttl AS s2c_ttl,
-                            @sip.$security_rule_list AS security_rule_list,
+                            @sip.$security_rule_uuid_list AS security_rule_uuid_list,
                             @sip.$security_action AS security_action,
-                            @sip.$monitor_rule_list AS monitor_rule_list,
-                            @sip.$shaping_rule_list AS shaping_rule_list,
-                            @sip.$proxy_rule_list AS proxy_rule_list,
-                            @sip.$statistics_rule_list AS statistics_rule_list,
-                            @sip.$sc_rule_list AS sc_rule_list,
-                            @sip.$sc_rsp_raw AS sc_rsp_raw,
-                            @sip.$sc_rsp_decrypted AS sc_rsp_decrypted,
+                            @sip.$monitor_rule_uuid_list AS monitor_rule_uuid_list,
+                            @sip.$shaping_rule_uuid_list AS shaping_rule_uuid_list,
+                            @sip.$proxy_rule_uuid_list AS proxy_rule_uuid_list,
+                            @sip.$statistics_rule_uuid_list AS statistics_rule_uuid_list,
+                            @sip.$sc_rule_uuid_list AS sc_rule_uuid_list,
+                            @sip.$sc_rsp_raw_uuid_list AS sc_rsp_raw_uuid_list,
+                            @sip.$sc_rsp_decrypted_uuid_list AS sc_rsp_decrypted_uuid_list,
                             @sip.$proxy_action AS proxy_action,
                             @sip.$proxy_pinning_status AS proxy_pinning_status,
                             @sip.$proxy_intercept_status AS proxy_intercept_status,
                             @sip.$proxy_passthrough_reason AS proxy_passthrough_reason,
-                            @sip.$proxy_client_side_latency_ms AS proxy_client_side_latency_ms,
-                            @sip.$proxy_server_side_latency_ms AS proxy_server_side_latency_ms,
-                            @sip.$proxy_client_side_version AS proxy_client_side_version,
-                            @sip.$proxy_server_side_version AS proxy_server_side_version,
+                            @sip.$proxy_source_side_latency_ms AS proxy_source_side_latency_ms,
+                            @sip.$proxy_destination_side_latency_ms AS proxy_destination_side_latency_ms,
+                            @sip.$proxy_source_side_version AS proxy_source_side_version,
+                            @sip.$proxy_destination_side_version AS proxy_destination_side_version,
                             @sip.$proxy_cert_verify AS proxy_cert_verify,
                             @sip.$proxy_intercept_error AS proxy_intercept_error,
                             @sip.$monitor_mirrored_pkts AS monitor_mirrored_pkts,
                             @sip.$monitor_mirrored_bytes AS monitor_mirrored_bytes,
-                            @sip.$client_ip AS client_ip,
-                            @sip.$client_port AS client_port,
-                            @sip.$client_os_desc AS client_os_desc,
-                            @sip.$client_geolocation AS client_geolocation,
-                            @sip.$client_country AS client_country,
-                            @sip.$client_super_administrative_area AS client_super_administrative_area,
-                            @sip.$client_administrative_area AS client_administrative_area,
-                            @sip.$client_sub_administrative_area AS client_sub_administrative_area,
-                            @sip.$client_asn AS client_asn,
+                            @sip.$source_ip AS source_ip,
+                            @sip.$source_port AS source_port,
+                            @sip.$source_os_desc AS source_os_desc,
+                            @sip.$source_country AS source_country,
+                            @sip.$source_asn AS source_asn,
                             @sip.$subscriber_id AS subscriber_id,
+                            @sip.$subscriber_id_hmac AS subscriber_id_hmac,
                             @sip.$imei AS imei,
                             @sip.$imsi AS imsi,
                             @sip.$phone_number AS phone_number,
+                            @sip.$phone_number_hmac AS phone_number_hmac,
                             @sip.$apn AS apn,
-                            @sip.$server_ip AS server_ip,
-                            @sip.$server_port AS server_port,
-                            @sip.$server_os_desc AS server_os_desc,
-                            @sip.$server_geolocation AS server_geolocation,
-                            @sip.$server_country AS server_country,
-                            @sip.$server_super_administrative_area AS server_super_administrative_area,
-                            @sip.$server_administrative_area AS server_administrative_area,
-                            @sip.$server_sub_administrative_area AS server_sub_administrative_area,
-                            @sip.$server_asn AS server_asn,
-                            @sip.$server_fqdn AS server_fqdn,
-                            @sip.$server_domain AS server_domain,
-                            @sip.$fqdn_category_list AS fqdn_category_list,
+                            @sip.$mobile_identify AS mobile_identify,
+                            @sip.$destination_ip AS destination_ip,
+                            @sip.$destination_port AS destination_port,
+                            @sip.$destination_os_desc AS destination_os_desc,
+                            @sip.$destination_country AS destination_country,
+                            @sip.$destination_asn AS destination_asn,
+                            @sip.$destination_fqdn AS destination_fqdn,
+                            @sip.$destination_domain AS destination_domain,
+                            @sip.$destination_fqdn_tags AS destination_fqdn_tags,
                             @sip.$app_transition AS app_transition,
                             @sip.$app AS app,
                             @sip.$app_category AS app_category,
@@ -1550,25 +1500,17 @@ pipeline:
                         @i.$c2s_ttl AS c2s_ttl,
                         @i.$s2c_ttl AS s2c_ttl,
                        
-                        @i.$client_ip AS client_ip,
-                        @i.$client_port AS client_port,
-                        @i.$client_os_desc AS client_os_desc,
-                        @i.$client_geolocation AS client_geolocation,
-                        @i.$client_country AS client_country,
-                        @i.$client_super_administrative_area AS client_super_administrative_area,
-                        @i.$client_administrative_area AS client_administrative_area,
-                        @i.$client_sub_administrative_area AS client_sub_administrative_area,
-                        @i.$client_asn AS client_asn,
+                        @i.$source_ip AS source_ip,
+                        @i.$source_port AS source_port,
+                        @i.$source_os_desc AS source_os_desc,
+                        @i.$source_country AS source_country,
+                        @i.$source_asn AS source_asn,
                         
-                        @i.$server_ip AS server_ip,
-                        @i.$server_port AS server_port,
-                        @i.$server_os_desc AS server_os_desc,
-                        @i.$server_geolocation AS server_geolocation,
-                        @i.$server_country AS server_country,
-                        @i.$server_super_administrative_area AS server_super_administrative_area,
-                        @i.$server_administrative_area AS server_administrative_area,
-                        @i.$server_sub_administrative_area AS server_sub_administrative_area,
-                        @i.$server_asn AS server_asn,
+                        @i.$destination_ip AS destination_ip,
+                        @i.$destination_port AS destination_port,
+                        @i.$destination_os_desc AS destination_os_desc,
+                        @i.$destination_country AS destination_country,
+                        @i.$destination_asn AS destination_asn,
                         
                         @i.$ip_protocol AS ip_protocol,
                         
@@ -1582,13 +1524,13 @@ pipeline:
                         @i.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
                         @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
                         @i.$rtp_pcap_path AS rtp_pcap_path,
-                        ( @i.$client_ip == sip_originator_sdp_connect_ip).?(1, (@i.$client_ip == sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
+                        ( @i.$source_ip == sip_originator_sdp_connect_ip).?(1, (@i.$source_ip == sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
               - SET sip_status FROM true AS be_used
               - TRUNCATE rtp
           # TODO USE EVENT
           - SCHEDULING USING PROCESS TIME FOR NOW + 6 * 60 * 1000
       - on: rtp-records
-        key-by: vsys_id, SORT_ADDRESS( client_ip, client_port, server_ip, server_port ) AS address
+        key-by: vsys_id, SORT_ADDRESS( source_ip, source_port, destination_ip, destination_port ) AS address
         process:
           - APPEND rtp FROM withColumns(recv_time to rtp_originator_dir)
           - if: '@sip.isNotNull'
@@ -1623,25 +1565,17 @@ pipeline:
                                 @i.$c2s_ttl AS c2s_ttl,
                                 @i.$s2c_ttl AS s2c_ttl,
                                 
-                                @i.$client_ip AS client_ip,
-                                @i.$client_port AS client_port,
-                                @i.$client_os_desc AS client_os_desc,
-                                @i.$client_geolocation AS client_geolocation,
-                                @i.$client_country AS client_country,
-                                @i.$client_super_administrative_area AS client_super_administrative_area,
-                                @i.$client_administrative_area AS client_administrative_area,
-                                @i.$client_sub_administrative_area AS client_sub_administrative_area,
-                                @i.$client_asn AS client_asn,
+                                @i.$source_ip AS source_ip,
+                                @i.$source_port AS source_port,
+                                @i.$source_os_desc AS source_os_desc,
+                                @i.$source_country AS source_country,
+                                @i.$source_asn AS source_asn,
                                 
-                                @i.$server_ip AS server_ip,
-                                @i.$server_port AS server_port,
-                                @i.$server_os_desc AS server_os_desc,
-                                @i.$server_geolocation AS server_geolocation,
-                                @i.$server_country AS server_country,
-                                @i.$server_super_administrative_area AS server_super_administrative_area,
-                                @i.$server_administrative_area AS server_administrative_area,
-                                @i.$server_sub_administrative_area AS server_sub_administrative_area,
-                                @i.$server_asn AS server_asn,
+                                @i.$destination_ip AS destination_ip,
+                                @i.$destination_port AS destination_port,
+                                @i.$destination_os_desc AS destination_os_desc,
+                                @i.$destination_country AS destination_country,
+                                @i.$destination_asn AS destination_asn,
                                 
                                 @i.$ip_protocol AS ip_protocol,
                                 
@@ -1670,7 +1604,7 @@ pipeline:
                                 @i.$rtp_payload_type_c2s AS rtp_payload_type_c2s,
                                 @i.$rtp_payload_type_s2c AS rtp_payload_type_s2c,
                                 @i.$rtp_pcap_path AS rtp_pcap_path,
-                                ( @i.$client_ip == @sip.$sip_originator_sdp_connect_ip).?(1, (@i.$client_ip == @sip.$sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
+                                ( @i.$source_ip == @sip.$sip_originator_sdp_connect_ip).?(1, (@i.$source_ip == @sip.$sip_responder_sdp_connect_ip).?(2, 0) ) AS rtp_originator_dir
               - SET sip_status FROM true AS be_used
               - TRUNCATE rtp
           - SCHEDULING USING PROCESS TIME FOR NOW + 6 * 60 * 1000
@@ -1705,53 +1639,48 @@ pipeline:
                             @i.$flags_identify_info AS flags_identify_info,
                             @i.$c2s_ttl AS c2s_ttl,
                             @i.$s2c_ttl AS s2c_ttl,
-                            @i.$security_rule_list AS security_rule_list,
+                            @i.$security_rule_uuid_list AS security_rule_uuid_list,
                             @i.$security_action AS security_action,
-                            @i.$monitor_rule_list AS monitor_rule_list,
-                            @i.$shaping_rule_list AS shaping_rule_list,
-                            @i.$proxy_rule_list AS proxy_rule_list,
-                            @i.$statistics_rule_list AS statistics_rule_list,
-                            @i.$sc_rule_list AS sc_rule_list,
-                            @i.$sc_rsp_raw AS sc_rsp_raw,
-                            @i.$sc_rsp_decrypted AS sc_rsp_decrypted,
+                            @i.$monitor_rule_uuid_list AS monitor_rule_uuid_list,
+                            @i.$shaping_rule_uuid_list AS shaping_rule_uuid_list,
+                            @i.$proxy_rule_uuid_list AS proxy_rule_uuid_list,
+                            @i.$statistics_rule_uuid_list AS statistics_rule_uuid_list,
+                            @i.$sc_rule_uuid_list AS sc_rule_uuid_list,
+                            @i.$sc_rsp_raw_uuid_list AS sc_rsp_raw_uuid_list,
+                            @i.$sc_rsp_decrypted_uuid_list AS sc_rsp_decrypted_uuid_list,
                             @i.$proxy_action AS proxy_action,
                             @i.$proxy_pinning_status AS proxy_pinning_status,
                             @i.$proxy_intercept_status AS proxy_intercept_status,
                             @i.$proxy_passthrough_reason AS proxy_passthrough_reason,
-                            @i.$proxy_client_side_latency_ms AS proxy_client_side_latency_ms,
-                            @i.$proxy_server_side_latency_ms AS proxy_server_side_latency_ms,
-                            @i.$proxy_client_side_version AS proxy_client_side_version,
-                            @i.$proxy_server_side_version AS proxy_server_side_version,
+                            @i.$proxy_source_side_latency_ms AS proxy_source_side_latency_ms,
+                            @i.$proxy_destination_side_latency_ms AS proxy_destination_side_latency_ms,
+                            @i.$proxy_source_side_version AS proxy_source_side_version,
+                            @i.$proxy_destination_side_version AS proxy_destination_side_version,
                             @i.$proxy_cert_verify AS proxy_cert_verify,
                             @i.$proxy_intercept_error AS proxy_intercept_error,
                             @i.$monitor_mirrored_pkts AS monitor_mirrored_pkts,
                             @i.$monitor_mirrored_bytes AS monitor_mirrored_bytes,
-                            @i.$client_ip AS client_ip,
-                            @i.$client_port AS client_port,
-                            @i.$client_os_desc AS client_os_desc,
-                            @i.$client_geolocation AS client_geolocation,
-                            @i.$client_country AS client_country,
-                            @i.$client_super_administrative_area AS client_super_administrative_area,
-                            @i.$client_administrative_area AS client_administrative_area,
-                            @i.$client_sub_administrative_area AS client_sub_administrative_area,
-                            @i.$client_asn AS client_asn,
+                            @i.$source_ip AS source_ip,
+                            @i.$source_port AS source_port,
+                            @i.$source_os_desc AS source_os_desc,
+                            @i.$source_country AS source_country,
+                            @i.$source_asn AS source_asn,
                             @i.$subscriber_id AS subscriber_id,
+                            @i.$subscriber_id_hmac AS subscriber_id_hmac,
                             @i.$imei AS imei,
                             @i.$imsi AS imsi,
                             @i.$phone_number AS phone_number,
+                            @i.$phone_number_hmac AS phone_number_hmac,
                             @i.$apn AS apn,
-                            @i.$server_ip AS server_ip,
-                            @i.$server_port AS server_port,
-                            @i.$server_os_desc AS server_os_desc,
-                            @i.$server_geolocation AS server_geolocation,
-                            @i.$server_country AS server_country,
-                            @i.$server_super_administrative_area AS server_super_administrative_area,
-                            @i.$server_administrative_area AS server_administrative_area,
-                            @i.$server_sub_administrative_area AS server_sub_administrative_area,
-                            @i.$server_asn AS server_asn,
-                            @i.$server_fqdn AS server_fqdn,
-                            @i.$server_domain AS server_domain,
-                            @i.$fqdn_category_list AS fqdn_category_list,
+                            @i.$mobile_identify AS mobile_identify,
+                            @i.$destination_ip AS destination_ip,
+                            @i.$destination_port AS destination_port,
+                            @i.$destination_os_desc AS destination_os_desc,
+                            @i.$destination_country AS destination_country,
+                            @i.$destination_asn AS destination_asn,
+                            @i.$destination_fqdn AS destination_fqdn,
+                            @i.$destination_domain AS destination_domain,
+                            @i.$destination_fqdn_tags AS destination_fqdn_tags,
                             @i.$app_transition AS app_transition,
                             @i.$app AS app,
                             @i.$app_category AS app_category,
@@ -1838,53 +1767,48 @@ pipeline:
                         @sip.$flags_identify_info AS flags_identify_info,
                         @sip.$c2s_ttl AS c2s_ttl,
                         @sip.$s2c_ttl AS s2c_ttl,
-                        @sip.$security_rule_list AS security_rule_list,
+                        @sip.$security_rule_uuid_list AS security_rule_uuid_list,
                         @sip.$security_action AS security_action,
-                        @sip.$monitor_rule_list AS monitor_rule_list,
-                        @sip.$shaping_rule_list AS shaping_rule_list,
-                        @sip.$proxy_rule_list AS proxy_rule_list,
-                        @sip.$statistics_rule_list AS statistics_rule_list,
-                        @sip.$sc_rule_list AS sc_rule_list,
-                        @sip.$sc_rsp_raw AS sc_rsp_raw,
-                        @sip.$sc_rsp_decrypted AS sc_rsp_decrypted,
+                        @sip.$monitor_rule_uuid_list AS monitor_rule_uuid_list,
+                        @sip.$shaping_rule_uuid_list AS shaping_rule_uuid_list,
+                        @sip.$proxy_rule_uuid_list AS proxy_rule_uuid_list,
+                        @sip.$statistics_rule_uuid_list AS statistics_rule_uuid_list,
+                        @sip.$sc_rule_uuid_list AS sc_rule_uuid_list,
+                        @sip.$sc_rsp_raw_uuid_list AS sc_rsp_raw_uuid_list,
+                        @sip.$sc_rsp_decrypted_uuid_list AS sc_rsp_decrypted_uuid_list,
                         @sip.$proxy_action AS proxy_action,
                         @sip.$proxy_pinning_status AS proxy_pinning_status,
                         @sip.$proxy_intercept_status AS proxy_intercept_status,
                         @sip.$proxy_passthrough_reason AS proxy_passthrough_reason,
-                        @sip.$proxy_client_side_latency_ms AS proxy_client_side_latency_ms,
-                        @sip.$proxy_server_side_latency_ms AS proxy_server_side_latency_ms,
-                        @sip.$proxy_client_side_version AS proxy_client_side_version,
-                        @sip.$proxy_server_side_version AS proxy_server_side_version,
+                        @sip.$proxy_source_side_latency_ms AS proxy_source_side_latency_ms,
+                        @sip.$proxy_destination_side_latency_ms AS proxy_destination_side_latency_ms,
+                        @sip.$proxy_source_side_version AS proxy_source_side_version,
+                        @sip.$proxy_destination_side_version AS proxy_destination_side_version,
                         @sip.$proxy_cert_verify AS proxy_cert_verify,
                         @sip.$proxy_intercept_error AS proxy_intercept_error,
                         @sip.$monitor_mirrored_pkts AS monitor_mirrored_pkts,
                         @sip.$monitor_mirrored_bytes AS monitor_mirrored_bytes,
-                        @sip.$client_ip AS client_ip,
-                        @sip.$client_port AS client_port,
-                        @sip.$client_os_desc AS client_os_desc,
-                        @sip.$client_geolocation AS client_geolocation,
-                        @sip.$client_country AS client_country,
-                        @sip.$client_super_administrative_area AS client_super_administrative_area,
-                        @sip.$client_administrative_area AS client_administrative_area,
-                        @sip.$client_sub_administrative_area AS client_sub_administrative_area,
-                        @sip.$client_asn AS client_asn,
+                        @sip.$source_ip AS source_ip,
+                        @sip.$source_port AS source_port,
+                        @sip.$source_os_desc AS source_os_desc,
+                        @sip.$source_country AS source_country,
+                        @sip.$source_asn AS source_asn,
                         @sip.$subscriber_id AS subscriber_id,
+                        @sip.$subscriber_id_hmac AS subscriber_id_hmac,
                         @sip.$imei AS imei,
                         @sip.$imsi AS imsi,
                         @sip.$phone_number AS phone_number,
+                        @sip.$phone_number_hmac AS phone_number_hmac,
                         @sip.$apn AS apn,
-                        @sip.$server_ip AS server_ip,
-                        @sip.$server_port AS server_port,
-                        @sip.$server_os_desc AS server_os_desc,
-                        @sip.$server_geolocation AS server_geolocation,
-                        @sip.$server_country AS server_country,
-                        @sip.$server_super_administrative_area AS server_super_administrative_area,
-                        @sip.$server_administrative_area AS server_administrative_area,
-                        @sip.$server_sub_administrative_area AS server_sub_administrative_area,
-                        @sip.$server_asn AS server_asn,
-                        @sip.$server_fqdn AS server_fqdn,
-                        @sip.$server_domain AS server_domain,
-                        @sip.$fqdn_category_list AS fqdn_category_list,
+                        @sip.$mobile_identify AS mobile_identify,
+                        @sip.$destination_ip AS destination_ip,
+                        @sip.$destination_port AS destination_port,
+                        @sip.$destination_os_desc AS destination_os_desc,
+                        @sip.$destination_country AS destination_country,
+                        @sip.$destination_asn AS destination_asn,
+                        @sip.$destination_fqdn AS destination_fqdn,
+                        @sip.$destination_domain AS destination_domain,
+                        @sip.$destination_fqdn_tags AS destination_fqdn_tags,
                         @sip.$app_transition AS app_transition,
                         @sip.$app AS app,
                         @sip.$app_category AS app_category,
